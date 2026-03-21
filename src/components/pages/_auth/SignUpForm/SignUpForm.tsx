@@ -17,7 +17,7 @@ const SignUpForm = () => {
         dispatch(setUser({
             id: "1",
             name: data.name,
-            username: data.name.toLowerCase().replace(" ", "_"),
+            username: data.username,
             email: data.email,
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user_123"
         }))
@@ -45,6 +45,17 @@ const SignUpForm = () => {
                         placeholder="John Doe"
                     />
                     {errors.name && <span className="label-text-alt text-error font-medium px-1 mt-0.5">{errors.name.message}</span>}
+                </label>
+
+                <label className="form-control w-full gap-1.5">
+                    <span className="label-text font-semibold uppercase text-[11px] px-1 opacity-70">Username</span>
+                    <input
+                        {...register("username")}
+                        type="text"
+                        className={`input input-bordered w-full focus:input-primary transition-all duration-300 h-11 ${errors.username ? "input-error" : ""}`}
+                        placeholder="johndoe"
+                    />
+                    {errors.username && <span className="label-text-alt text-error font-medium px-1 mt-0.5">{errors.username.message}</span>}
                 </label>
 
                 <label className="form-control w-full gap-1.5">

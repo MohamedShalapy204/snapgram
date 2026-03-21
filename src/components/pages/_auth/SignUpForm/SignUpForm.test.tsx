@@ -17,9 +17,10 @@ describe("SignUpForm", () => {
 
         // Assert
         expect(screen.getByText(/Join our community/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Name/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Email/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Password/i)).toBeInTheDocument()
+        expect(screen.getByLabelText("Name")).toBeInTheDocument()
+        expect(screen.getByLabelText("Username")).toBeInTheDocument()
+        expect(screen.getByLabelText("Email")).toBeInTheDocument()
+        expect(screen.getByLabelText("Password")).toBeInTheDocument()
         expect(screen.getByRole("button", { name: /Sign Up/i })).toBeInTheDocument()
     })
 
@@ -33,9 +34,28 @@ describe("SignUpForm", () => {
         fireEvent.click(submitButton)
 
         // Assert
-        expect(await screen.findByText(/Name is required/i)).toBeInTheDocument()
-        expect(await screen.findByText(/Email is required/i)).toBeInTheDocument()
-        expect(await screen.findByText(/Password is required/i)).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByText("Name is required")).toBeInTheDocument()
+            expect(screen.getByText("Username is required")).toBeInTheDocument()
+            expect(screen.getByText("Email is required")).toBeInTheDocument()
+            expect(screen.getByText("Password is required")).toBeInTheDocument()
+        })
+    })
+
+    // Boundary Testing: Username length
+    it("should show error for username shorter than 3 characters", async () => {
+        // Arrange
+        renderSignUpForm()
+
+        // Act
+        const usernameInput = screen.getByPlaceholderText("johndoe")
+        fireEvent.change(usernameInput, { target: { value: "ab" } })
+        fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }))
+
+        // Assert
+        await waitFor(() => {
+            expect(screen.getByText("Min 3 characters")).toBeInTheDocument()
+        })
     })
 
     // Boundary Testing: Password length
@@ -62,12 +82,14 @@ describe("SignUpForm", () => {
         renderSignUpForm()
 
         const nameInput = screen.getByPlaceholderText(/John Doe/i)
+        const usernameInput = screen.getByPlaceholderText(/johndoe/i)
         const emailInput = screen.getByPlaceholderText(/m@example.com/i)
         const passwordInput = screen.getByPlaceholderText(/••••••••/i)
         const submitButton = screen.getByRole("button", { name: /Sign Up/i })
 
         // Act
         fireEvent.change(nameInput, { target: { value: "Alice Jones" } })
+        fireEvent.change(usernameInput, { target: { value: "alice_j" } })
         fireEvent.change(emailInput, { target: { value: "alice@snap.com" } })
         fireEvent.change(passwordInput, { target: { value: "secure-password" } })
         fireEvent.click(submitButton)
@@ -76,6 +98,7 @@ describe("SignUpForm", () => {
         await waitFor(() => {
             expect(consoleSpy).toHaveBeenCalledWith("Demo signing up:", {
                 name: "Alice Jones",
+                username: "alice_j",
                 email: "alice@snap.com",
                 password: "secure-password",
             })
