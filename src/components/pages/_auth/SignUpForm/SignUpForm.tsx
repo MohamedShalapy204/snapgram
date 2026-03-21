@@ -3,24 +3,21 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { signupSchema, type SignupSchema } from "../../../../utils/validation.ts"
-import { useAppDispatch } from "../../../../store/hooks.ts"
-import { setUser } from "../../../../store/features/authSlice.ts"
+import { useSignUp } from "../../../../hooks/queries/useAuth.ts"
 
 const SignUpForm = () => {
-    const dispatch = useAppDispatch()
     const { register, handleSubmit, formState: { errors } } = useForm<SignupSchema>({
         resolver: zodResolver(signupSchema)
     })
 
-    const onSubmit = (data: SignupSchema) => {
-        console.log("Demo signing up:", data)
-        dispatch(setUser({
-            id: "1",
-            name: data.name,
-            username: data.username,
-            email: data.email,
-            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user_123"
-        }))
+    const { mutateAsync: signUp, isPending } = useSignUp()
+
+    const onSubmit = async (data: SignupSchema) => {
+        try {
+            await signUp(data)
+        } catch (error) {
+            console.error("SignUpForm :: onSubmit error:", error)
+        }
     }
 
     return (
@@ -80,8 +77,8 @@ const SignUpForm = () => {
                     {errors.password && <span className="label-text-alt text-error font-medium px-1 mt-0.5">{errors.password.message}</span>}
                 </label>
 
-                <button type="submit" className="btn btn-primary w-full h-12 text-md font-bold uppercase tracking-widest shadow-lg mt-3 transition-transform active:scale-[0.98]">
-                    Sign Up
+                <button type="submit" disabled={isPending} className="btn btn-primary w-full h-12 text-md font-bold uppercase tracking-widest shadow-lg mt-3 transition-transform active:scale-[0.98]">
+                    {isPending ? <span className="loading loading-spinner"></span> : "Sign Up"}
                 </button>
             </form>
 
