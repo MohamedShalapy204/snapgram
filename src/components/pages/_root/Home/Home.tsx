@@ -1,4 +1,5 @@
-import { usePosts, type Post } from "../../../../hooks/usePosts.ts"
+import { usePosts } from "../../../../hooks/usePosts.ts"
+import { type Post } from "../../../../types/index.ts"
 
 /**
  * Home component - Displays the main feed of snaps.

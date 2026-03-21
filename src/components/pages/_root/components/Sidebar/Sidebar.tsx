@@ -1,10 +1,14 @@
 import { Link, useLocation } from "react-router-dom"
 import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare } from "react-icons/fa"
+import { type INavLink } from "../../../../../types/index.ts"
+import { useAppDispatch } from "../../../../../store/hooks.ts"
+import { logout } from "../../../../../store/features/authSlice.ts"
 
 const Sidebar = () => {
+    const dispatch = useAppDispatch()
     const { pathname } = useLocation()
 
-    const navLinks = [
+    const navLinks: INavLink[] = [
         { name: "Home", path: "/", icon: <FaHome /> },
         { name: "Explore", path: "/explore", icon: <FaCompass /> },
         { name: "People", path: "/all-users", icon: <FaUsers /> },
@@ -52,7 +56,10 @@ const Sidebar = () => {
             </ul>
 
             <div className="mt-auto flex flex-col pt-8 border-t border-base-300/50">
-                <button className="btn btn-ghost justify-start group hover:bg-error/10 hover:text-error transition-all font-black text-md p-4 rounded-2xl active:scale-95">
+                <button
+                    onClick={() => dispatch(logout())}
+                    className="btn btn-ghost justify-start group hover:bg-error/10 hover:text-error transition-all font-black text-md p-4 rounded-2xl active:scale-95"
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>

@@ -1,13 +1,14 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Topbar from "../components/Topbar"
+import { useAppSelector } from "../../../../store/hooks.ts"
 
 /**
  * RootLayout - Private area layout with Sidebar and Topbar.
  * Following react-ecosystem guidelines: separate layout logic from components.
  */
 const RootLayout = () => {
-    const isAuthenticated = false // demo auth logic
+    const { isAuthenticated } = useAppSelector((state) => state.auth)
 
     if (!isAuthenticated) {
         return <Navigate to="/signin" />

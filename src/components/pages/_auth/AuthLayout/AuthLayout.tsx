@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom"
+import { useAppSelector } from "../../../../store/hooks.ts"
 
 /**
  * AuthLayout - Main layout for public authentication pages (SignIn, SignUp).
  * Following composition pattern and clean react code principles.
  */
 const AuthLayout = () => {
-    const isAuthenticated = false // demo auth logic
+    const { isAuthenticated } = useAppSelector((state) => state.auth)
 
     if (isAuthenticated) {
         return <Navigate to="/" />

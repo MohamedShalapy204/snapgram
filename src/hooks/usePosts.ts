@@ -1,12 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-
-export interface Post {
-  id: number
-  author: string
-  avatar: string
-  content: string
-  image: string
-}
+import { type Post } from "../types/index.ts"
 
 const POSTS_DATA: Post[] = [
   {

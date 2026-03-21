@@ -1,17 +1,23 @@
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
+import { type SignUpFormData } from "../../../../types/index.ts"
 
-interface SignUpFormData {
-    name: string
-    email: string
-    password: string
-}
+import { useAppDispatch } from "../../../../store/hooks.ts"
+import { setUser } from "../../../../store/features/authSlice.ts"
 
 const SignUpForm = () => {
+    const dispatch = useAppDispatch()
     const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>()
 
     const onSubmit = (data: SignUpFormData) => {
         console.log("Demo signing up:", data)
+        dispatch(setUser({
+            id: "1",
+            name: data.name,
+            username: data.name.toLowerCase().replace(" ", "_"),
+            email: data.email,
+            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user_123"
+        }))
     }
 
     return (

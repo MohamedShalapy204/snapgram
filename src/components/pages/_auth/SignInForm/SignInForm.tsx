@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
+import { type SignInFormData } from "../../../../types/index.ts"
 
-interface SignInFormData {
-    email: string
-    password: string
-}
+import { useAppDispatch } from "../../../../store/hooks.ts"
+import { setUser } from "../../../../store/features/authSlice.ts"
 
 /**
  * SignInForm component for user login.
@@ -12,11 +11,19 @@ interface SignInFormData {
  * Uses form state management with react-hook-form.
  */
 const SignInForm = () => {
+    const dispatch = useAppDispatch()
     const { register, handleSubmit, formState: { errors } } = useForm<SignInFormData>()
 
     const onSubmit = (data: SignInFormData) => {
-        // demo: log the form data
+        // demo: log the form data and update redux
         console.log("Demo signing in:", data)
+        dispatch(setUser({
+            id: "1",
+            name: "John Snap",
+            username: "john_snap",
+            email: data.email,
+            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user_123"
+        }))
     }
 
     return (
