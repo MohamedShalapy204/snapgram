@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { type SignUpFormData } from "../../../../types/index.ts"
+import { zodResolver } from "@hookform/resolvers/zod"
 
+import { signupSchema, type SignupSchema } from "../../../../utils/validation.ts"
 import { useAppDispatch } from "../../../../store/hooks.ts"
 import { setUser } from "../../../../store/features/authSlice.ts"
 
 const SignUpForm = () => {
     const dispatch = useAppDispatch()
-    const { register, handleSubmit, formState: { errors } } = useForm<SignUpFormData>()
+    const { register, handleSubmit, formState: { errors } } = useForm<SignupSchema>({
+        resolver: zodResolver(signupSchema)
+    })
 
-    const onSubmit = (data: SignUpFormData) => {
+    const onSubmit = (data: SignupSchema) => {
         console.log("Demo signing up:", data)
         dispatch(setUser({
             id: "1",
@@ -36,7 +39,7 @@ const SignUpForm = () => {
                 <label className="form-control w-full gap-1.5">
                     <span className="label-text font-semibold uppercase text-[11px] px-1 opacity-70">Name</span>
                     <input
-                        {...register("name", { required: "Name is required" })}
+                        {...register("name")}
                         type="text"
                         className={`input input-bordered w-full focus:input-primary transition-all duration-300 h-11 ${errors.name ? "input-error" : ""}`}
                         placeholder="John Doe"
@@ -47,7 +50,7 @@ const SignUpForm = () => {
                 <label className="form-control w-full gap-1.5">
                     <span className="label-text font-semibold uppercase text-[11px] px-1 opacity-70">Email</span>
                     <input
-                        {...register("email", { required: "Email is required" })}
+                        {...register("email")}
                         type="email"
                         className={`input input-bordered w-full focus:input-primary transition-all duration-300 h-11 ${errors.email ? "input-error" : ""}`}
                         placeholder="m@example.com"
@@ -58,7 +61,7 @@ const SignUpForm = () => {
                 <label className="form-control w-full gap-1.5">
                     <span className="label-text font-semibold uppercase text-[11px] px-1 opacity-70 underline-offset-4 decoration-primary/20">Password</span>
                     <input
-                        {...register("password", { required: "Password is required", minLength: { value: 8, message: "Min 8 characters" } })}
+                        {...register("password")}
                         type="password"
                         className={`input input-bordered w-full focus:input-primary transition-all duration-300 h-11 ${errors.password ? "input-error" : ""}`}
                         placeholder="••••••••"

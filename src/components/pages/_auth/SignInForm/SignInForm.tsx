@@ -1,20 +1,23 @@
 import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { type SignInFormData } from "../../../../types/index.ts"
+import { zodResolver } from "@hookform/resolvers/zod"
 
+import { signinSchema, type SigninSchema } from "../../../../utils/validation.ts"
 import { useAppDispatch } from "../../../../store/hooks.ts"
 import { setUser } from "../../../../store/features/authSlice.ts"
 
 /**
  * SignInForm component for user login.
  * Following react-ecosystem and clean-react-code patterns.
- * Uses form state management with react-hook-form.
+ * Uses Zod for schema-based validation.
  */
 const SignInForm = () => {
     const dispatch = useAppDispatch()
-    const { register, handleSubmit, formState: { errors } } = useForm<SignInFormData>()
+    const { register, handleSubmit, formState: { errors } } = useForm<SigninSchema>({
+        resolver: zodResolver(signinSchema)
+    })
 
-    const onSubmit = (data: SignInFormData) => {
+    const onSubmit = (data: SigninSchema) => {
         // demo: log the form data and update redux
         console.log("Demo signing in:", data)
         dispatch(setUser({
@@ -44,7 +47,7 @@ const SignInForm = () => {
                         <span className="label-text font-semibold uppercase text-[11px] tracking-widest opacity-70">Email</span>
                     </div>
                     <input
-                        {...register("email", { required: "Email is required" })}
+                        {...register("email")}
                         type="email"
                         className={`input input-bordered w-full focus:input-primary transition-all duration-300 ${errors.email ? "input-error" : ""}`}
                         placeholder="m@example.com"
@@ -58,7 +61,7 @@ const SignInForm = () => {
                         <Link to="#" className="label-text-alt text-primary hover:underline font-medium transition-colors">Forgot password?</Link>
                     </div>
                     <input
-                        {...register("password", { required: "Password is required" })}
+                        {...register("password")}
                         type="password"
                         className={`input input-bordered w-full focus:input-primary transition-all duration-300 ${errors.password ? "input-error" : ""}`}
                         placeholder="••••••••"

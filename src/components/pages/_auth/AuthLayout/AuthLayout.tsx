@@ -21,7 +21,7 @@ const AuthLayout = () => {
             </section>
 
             <img
-                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop"
+                src="/assets/side-img.jpg"
                 alt="Authentication background"
                 className="hidden h-screen w-1/2 bg-no-repeat object-cover lg:block shadow-2xl"
             />
