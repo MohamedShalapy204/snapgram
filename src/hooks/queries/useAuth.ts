@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername, getUserByEmail } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { UserAccount } from '../../types';
@@ -33,10 +33,17 @@ export const useSignUp = () => {
 
     return useMutation<Models.User<Models.Preferences>, Error, SignupSchema>({
         mutationFn: async (data: SignupSchema) => {
-            // Extra layer: ensure unique username before interacting with Auth Service
-            const existingUser = await getUserByUsername(data.username);
-            if (existingUser) {
+            // Extra layer: ensure unique username and email before interacting with Auth Service
+            const [existingUsername, existingEmail] = await Promise.all([
+                getUserByUsername(data.username),
+                getUserByEmail(data.email)
+            ]);
+
+            if (existingUsername) {
                 throw new Error("Username already taken. Please choose another one.");
+            }
+            if (existingEmail) {
+                throw new Error("Email already registered. Please choose another one or log in.");
             }
 
             const newAccount = await createUserAccount(data);

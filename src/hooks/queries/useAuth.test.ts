@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
 import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUser } from './useAuth';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
@@ -15,7 +15,8 @@ vi.mock('../../services/appwrite', () => ({
     sendVerificationEmail: vi.fn(),
     updateAccountName: vi.fn(),
     saveUserToDB: vi.fn(),
-    getUserByUsername: vi.fn()
+    getUserByUsername: vi.fn(),
+    getUserByEmail: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -32,6 +33,7 @@ describe('useSignUp Hook', () => {
         };
 
         vi.mocked(getUserByUsername as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
+        vi.mocked(getUserByEmail as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
         vi.mocked(createUserAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockAccount);
         vi.mocked(signInAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
 
@@ -85,6 +87,7 @@ describe('useSignUp Hook', () => {
         // Arrange
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         vi.mocked(getUserByUsername as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
+        vi.mocked(getUserByEmail as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
         vi.mocked(createUserAccount).mockRejectedValueOnce(new Error('Network error'));
 
         const { result, queryClient } = renderHook(() => useSignUp());
@@ -109,6 +112,7 @@ describe('useSignUp Hook', () => {
         // Arrange
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         vi.mocked(getUserByUsername as unknown as () => Promise<unknown>).mockResolvedValueOnce({ $id: 'existing_user' });
+        vi.mocked(getUserByEmail as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
 
         const { result, queryClient } = renderHook(() => useSignUp());
 
@@ -126,6 +130,32 @@ describe('useSignUp Hook', () => {
         expect(consoleSpy).toHaveBeenCalledWith("useSignUp :: error:", expect.any(Error));
 
         // Assert cache untouched
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
+
+        consoleSpy.mockRestore();
+    });
+
+    it('should throw an error and abort if email is already registered', async () => {
+        // Arrange
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.mocked(getUserByUsername as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
+        vi.mocked(getUserByEmail as unknown as () => Promise<unknown>).mockResolvedValueOnce({ $id: 'existing_user_by_email' });
+
+        const { result, queryClient } = renderHook(() => useSignUp());
+
+        // Act & Assert
+        await expect(result.current.mutateAsync({
+            name: 'Test',
+            username: 'valid_user',
+            email: 'taken@example.com',
+            password: 'password123'
+        })).rejects.toThrow('Email already registered. Please choose another one or log in.');
+
+        expect(getUserByEmail).toHaveBeenCalledWith('taken@example.com');
+        expect(createUserAccount).not.toHaveBeenCalled();
+
+        expect(consoleSpy).toHaveBeenCalledWith("useSignUp :: error:", expect.any(Error));
+
         expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
 
         consoleSpy.mockRestore();

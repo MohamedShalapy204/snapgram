@@ -136,3 +136,22 @@ export const getUserByUsername = async (username: string) => {
         throw error;
     }
 };
+
+/**
+ * Retrieves a user document by exact email match (for uniqueness validation).
+ */
+export const getUserByEmail = async (email: string) => {
+    try {
+        const users = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.usersCollectionId,
+            [Query.equal("email", email)]
+        );
+
+        if (users.total > 0) return users.documents[0] as unknown as User;
+        return null;
+    } catch (error) {
+        console.error("UserService :: getUserByEmail error:", error);
+        throw error;
+    }
+};
