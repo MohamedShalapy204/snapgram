@@ -30,7 +30,8 @@ describe('StorageService', () => {
             expect(storage.createFile).toHaveBeenCalledWith(
                 'test-storage',
                 expect.any(String),
-                mockFile
+                mockFile,
+                expect.any(Array)
             );
             expect(result).toEqual(mockCreatedFile);
         });

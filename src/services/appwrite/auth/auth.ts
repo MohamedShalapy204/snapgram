@@ -106,3 +106,12 @@ export const updateAccountPassword = async (newPassword: string, oldPassword?: s
     throw error;
   }
 };
+
+export const updateAccountPrefs = async (prefs: object) => {
+  try {
+    return await account.updatePrefs(prefs);
+  } catch (error) {
+    console.error("AuthService :: updateAccountPrefs error:", error);
+    throw error;
+  }
+};

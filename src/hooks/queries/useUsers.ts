@@ -37,7 +37,7 @@ export const useUpdateUserDB = () => {
                     const uploadedFile = await uploadFile(file[0]);
                     if (!uploadedFile) throw new Error("File upload failed");
 
-                    const newImageUrl = getFilePreview(uploadedFile.$id);
+                    const newImageUrl = getFilePreview(uploadedFile.$id).toString();
                     if (!newImageUrl) {
                         await deleteFile(uploadedFile.$id);
                         throw new Error("Failed to get image preview");

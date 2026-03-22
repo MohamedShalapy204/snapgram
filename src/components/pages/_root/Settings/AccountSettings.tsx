@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form"
-import { useUserAccount, useUpdatePassword, useUpdateUserAccount } from "../../../../hooks/queries/useAuth"
+import { useUserAccount, useUpdatePassword, useUpdateUserAccount, useUpdateUserPrefs } from "../../../../hooks/queries/useAuth"
 import { useGetUserById, useUpdateUserDB } from "../../../../hooks/queries/useUsers"
 import { useEffect, useState } from "react"
 import { MdVerified, MdVisibility, MdVisibilityOff } from "react-icons/md"
@@ -7,12 +7,17 @@ import { useToast } from "../../../../hooks/useToast"
 import FileUploader from "../../../shared/FileUploader"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { passwordUpdateSchema, type PasswordUpdateSchema } from "../../../../utils/validation"
+import { useQueryClient } from "@tanstack/react-query"
+import { QUERY_KEYS } from "../../../../keys/queryKeys"
+import type { UserAccount } from "../../../../types"
 
 const AccountSettings = () => {
+    const queryClient = useQueryClient()
     const { data: userAccount } = useUserAccount()
     const { data: user, isLoading: isLoadingUser } = useGetUserById(userAccount?.id || "")
     const { mutate: updateUser, isPending: isUpdating } = useUpdateUserDB()
     const { mutate: updateUserAccount } = useUpdateUserAccount()
+    const { mutate: updatePrefs } = useUpdateUserPrefs()
     const { mutate: updatePassword, isPending: isUpdatingPassword } = useUpdatePassword()
     const { success, error: toastError } = useToast()
 
@@ -70,8 +75,25 @@ const AccountSettings = () => {
             },
             file: data.file,
         }, {
-            onSuccess: () => {
+            onSuccess: (updatedUser) => {
                 success("Profile updated successfully!")
+
+                // Mirror the new avatar URL in Appwrite Account Preferences for server-side persistence
+                if (updatedUser?.imageUrl) {
+                    updatePrefs({ avatar: updatedUser.imageUrl })
+                }
+
+                // Manually update the current user cache for immediate effect across components (Sidebar, Topbar)
+                if (updatedUser) {
+                    queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], (old: UserAccount | null) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            name: updatedUser.name,
+                            avatar: updatedUser.imageUrl,
+                        }
+                    })
+                }
             },
             onError: (err) => {
                 toastError(err.message || "Failed to update profile")

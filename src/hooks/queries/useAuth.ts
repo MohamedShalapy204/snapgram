@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername, getUserByEmail, updateAccountPassword } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername, getUserByEmail, updateAccountPassword, getUserById, updateAccountPrefs } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema, PasswordUpdateSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { UserAccount } from '../../types';
@@ -28,11 +28,30 @@ export const useUpdateUserAccount = () => {
         mutationFn: (name: string) => updateAccountName(name),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_CURRENT_USER]
+                queryKey: [QUERY_KEYS.GET_CURRENT_USER],
             });
         },
         onError: (error: Error) => {
-            console.error("useUpdateUser :: error:", error);
+            console.error("useUpdateUserAccount :: error:", error);
+        }
+    });
+};
+
+/**
+ * Custom React Query Hook for updating the user's account preferences (e.g. avatar URL).
+ */
+export const useUpdateUserPrefs = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<Models.User<Models.Preferences>, Error, object>({
+        mutationFn: (prefs: object) => updateAccountPrefs(prefs),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_CURRENT_USER],
+            });
+        },
+        onError: (error: Error) => {
+            console.error("useUpdateUserPrefs :: error:", error);
         }
     });
 };
@@ -159,21 +178,30 @@ export const useUserAccount = () => {
                 const currentAccount = await getCurrentAccount();
                 if (!currentAccount) return null;
 
+                // Sync with database to get full profile details (username, avatar, etc.)
+                let userDoc = null;
+                try {
+                    userDoc = await getUserById(currentAccount.$id);
+                } catch (e) {
+                    console.error("useUserAccount :: could not sync with DB:", e);
+                }
+
                 return {
                     id: currentAccount.$id,
                     name: currentAccount.name,
-                    username: currentAccount.name.replace(/\s+/g, '').toLowerCase(), // Mocked mapping
+                    username: userDoc?.username || currentAccount.name.replace(/\s+/g, '').toLowerCase(),
                     email: currentAccount.email,
-                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentAccount.$id}`,
+                    avatar: (userDoc?.imageUrl && userDoc.imageUrl !== "[object Object]")
+                        ? userDoc.imageUrl
+                        : (currentAccount.prefs.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentAccount.$id}`),
                     verified: currentAccount.emailVerification
                 };
             } catch {
-                // If account get fails (e.g. no session), return null instead of throwing to avoid error boundary crashes on public routes
                 return null;
             }
         },
         staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-        retry: false // Do not retry missing sessions
+        retry: false
     });
 };
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
 import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUserAccount } from './useAuth';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail, getUserById, updateAccountPrefs } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
@@ -16,7 +16,9 @@ vi.mock('../../services/appwrite', () => ({
     updateAccountName: vi.fn(),
     saveUserToDB: vi.fn(),
     getUserByUsername: vi.fn(),
-    getUserByEmail: vi.fn()
+    getUserByEmail: vi.fn(),
+    getUserById: vi.fn(),
+    updateAccountPrefs: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -40,8 +42,6 @@ describe('useSignUp Hook', () => {
         const { result, queryClient } = renderHook(() => useSignUp());
 
         // Act
-        // We do not await directly here because we want to inspect intermediate states, 
-        // but since we want to wait for React Query's onSuccess, we use mutateAsync
         const mutationPromise = result.current.mutateAsync({
             name: 'Test User',
             username: 'test_user',
@@ -249,9 +249,17 @@ describe('useUserAccount Hook', () => {
             $id: 'user_123',
             name: 'Test User',
             email: 'test@example.com',
-            emailVerification: true
+            emailVerification: true,
+            prefs: {}
         };
+        const mockUserDoc = {
+            $id: 'doc_123',
+            username: 'testuser',
+            imageUrl: 'https://test-avatar.com/image.jpg'
+        };
+
         vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockAccount);
+        vi.mocked(getUserById as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockUserDoc);
 
         const { result } = renderHook(() => useUserAccount());
 
@@ -265,9 +273,11 @@ describe('useUserAccount Hook', () => {
             name: 'Test User',
             username: 'testuser',
             email: 'test@example.com',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user_123',
+            avatar: 'https://test-avatar.com/image.jpg',
             verified: true
         });
+
+        expect(getUserById).toHaveBeenCalledWith('user_123');
     });
 
     it('should return null if no session exists', async () => {
@@ -367,7 +377,7 @@ describe('useSendVerificationEmail Hook', () => {
     });
 });
 
-describe('useUpdateUser Hook', () => {
+describe('useUpdateUserAccount Hook', () => {
     it('should successfully update user name and invalidate cache', async () => {
         // Arrange
         const mockUser = { $id: '123', name: 'New Name' };
@@ -391,7 +401,7 @@ describe('useUpdateUser Hook', () => {
 
         // Act & Assert
         await expect(result.current.mutateAsync('Name')).rejects.toThrow('Update failed');
-        expect(consoleSpy).toHaveBeenCalledWith("useUpdateUser :: error:", expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith("useUpdateUserAccount :: error:", expect.any(Error));
 
         consoleSpy.mockRestore();
     });

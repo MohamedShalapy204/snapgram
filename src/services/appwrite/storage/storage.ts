@@ -1,4 +1,4 @@
-import { ID, ImageGravity } from "appwrite";
+import { ID, ImageGravity, Permission, Role } from "appwrite";
 import { storage, appwriteConfig } from "../config";
 
 /**
@@ -9,7 +9,11 @@ export const uploadFile = async (file: File) => {
         const uploadedFile = await storage.createFile(
             appwriteConfig.storageId,
             ID.unique(),
-            file
+            file,
+            [
+                Permission.read(Role.any()), // Allow everyone to read (needed for public profile pictures)
+                Permission.write(Role.users()), // Allow any logged-in user to create/manage their files
+            ]
         );
 
         return uploadedFile;
@@ -33,7 +37,7 @@ export const getFilePreview = (fileId: string) => {
             100
         );
 
-        return fileUrl;
+        return fileUrl.toString();
     } catch (error) {
         console.error("StorageService :: getFilePreview error:", error);
         return "";
