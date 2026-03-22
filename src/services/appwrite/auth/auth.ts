@@ -94,3 +94,15 @@ export const updateAccountName = async (name: string) => {
     throw error;
   }
 };
+
+/**
+ * Updates the user's password on their account.
+ */
+export const updateAccountPassword = async (newPassword: string, oldPassword?: string) => {
+  try {
+    return await account.updatePassword(newPassword, oldPassword);
+  } catch (error) {
+    console.error("AuthService :: updateAccountPassword error:", error);
+    throw error;
+  }
+};

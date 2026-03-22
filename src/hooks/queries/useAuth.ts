@@ -1,14 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername, getUserByEmail } from '../../services/appwrite';
-import type { SignupSchema, SigninSchema } from '../../utils/validation';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername, getUserByEmail, updateAccountPassword } from '../../services/appwrite';
+import type { SignupSchema, SigninSchema, PasswordUpdateSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { UserAccount } from '../../types';
 
 /**
+ * Custom React Query Hook for updating the user's password.
+ */
+export const useUpdatePassword = () => {
+    return useMutation<Models.User<Models.Preferences>, Error, PasswordUpdateSchema>({
+        mutationFn: (data: PasswordUpdateSchema) =>
+            updateAccountPassword(data.newPassword, data.password),
+        onError: (error: Error) => {
+            console.error("useUpdatePassword :: error:", error);
+        }
+    });
+};
+
+/**
  * Custom React Query Hook for updating the user's name.
  */
-export const useUpdateUser = () => {
+export const useUpdateUserAccount = () => {
     const queryClient = useQueryClient();
 
     return useMutation<Models.User<Models.Preferences>, Error, string>({

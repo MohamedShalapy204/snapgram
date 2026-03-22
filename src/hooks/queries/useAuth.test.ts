@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
-import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUser } from './useAuth';
+import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUserAccount } from './useAuth';
 import type { Models } from 'appwrite';
 import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
@@ -372,7 +372,7 @@ describe('useUpdateUser Hook', () => {
         // Arrange
         const mockUser = { $id: '123', name: 'New Name' };
         vi.mocked(updateAccountName).mockResolvedValueOnce(mockUser as unknown as Awaited<ReturnType<typeof updateAccountName>>);
-        const { result, queryClient } = renderHook(() => useUpdateUser());
+        const { result, queryClient } = renderHook(() => useUpdateUserAccount());
         const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
         // Act
@@ -387,7 +387,7 @@ describe('useUpdateUser Hook', () => {
         // Arrange
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         vi.mocked(updateAccountName).mockRejectedValueOnce(new Error('Update failed'));
-        const { result } = renderHook(() => useUpdateUser());
+        const { result } = renderHook(() => useUpdateUserAccount());
 
         // Act & Assert
         await expect(result.current.mutateAsync('Name')).rejects.toThrow('Update failed');
