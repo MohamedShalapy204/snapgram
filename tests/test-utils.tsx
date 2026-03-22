@@ -4,14 +4,14 @@ import { BrowserRouter } from "react-router-dom"
 import { Provider } from "react-redux"
 import { combineReducers, configureStore } from "@reduxjs/toolkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import authReducer from "../src/store/features/authSlice.ts"
 import type { RootState, AppStore } from "../src/store/store.ts"
 
 /**
  * Combined reducer for use in tests to match the store's structure and satisfy RTK types.
  */
 const rootReducer = combineReducers({
-    auth: authReducer,
+    // Keep empty for now until new features require client state
+    default: (state = null) => state
 })
 
 /**
@@ -53,7 +53,7 @@ function render(
             </Provider>
         )
     }
-    return { store, ...rtlRender(ui, { wrapper: Wrapper, ...renderOptions }) }
+    return { store, queryClient, ...rtlRender(ui, { wrapper: Wrapper, ...renderOptions }) }
 }
 
 // Re-export specific utilities from RTL to satisfy linting rules for named component exports
@@ -91,8 +91,8 @@ export function renderHook<Result, Props>(
     }
 
     // As of RTL 13.1 renderHook returns { result, rerender, unmount } without store, 
-    // so we re-attach store to access it manually using destructuring.
-    return { store, ...rtlRenderHook(renderCallback, { wrapper: Wrapper, ...renderOptions }) }
+    // so we re-attach store and queryClient to access them manually using destructuring.
+    return { store, queryClient, ...rtlRenderHook(renderCallback, { wrapper: Wrapper, ...renderOptions }) }
 }
 
 // Override the RTL render with our custom one

@@ -1,6 +1,14 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen, fireEvent, waitFor } from "../../../../../tests/test-utils.tsx"
 import SignInForm from "./SignInForm.tsx"
+import { useSignIn } from "../../../../hooks/queries/useAuth"
+
+vi.mock("../../../../hooks/queries/useAuth", () => ({
+    useSignIn: vi.fn(() => ({
+        mutateAsync: vi.fn(),
+        isPending: false
+    }))
+}))
 
 /**
  * Helper to render component within a router and redux context
@@ -10,6 +18,9 @@ const renderSignInForm = () => {
 }
 
 describe("SignInForm", () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
     // Positive Testing: Successful Rendering
     it("should render join message and form fields", () => {
         // Arrange
@@ -36,9 +47,14 @@ describe("SignInForm", () => {
     })
 
     // Positive Testing: Valid Submission
-    it("should log form data and update redux on valid submission", async () => {
+    it("should call useSignIn mutate function on valid submission", async () => {
         // Arrange
-        const consoleSpy = vi.spyOn(console, "log")
+        const mockMutateAsync = vi.fn().mockResolvedValueOnce({})
+        vi.mocked(useSignIn).mockReturnValue({
+            mutateAsync: mockMutateAsync,
+            isPending: false
+        } as unknown as ReturnType<typeof useSignIn>)
+
         renderSignInForm()
 
         const emailInput = screen.getByPlaceholderText(/m@example.com/i)
@@ -52,12 +68,10 @@ describe("SignInForm", () => {
 
         // Assert
         await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledWith("Demo signing in:", {
+            expect(mockMutateAsync).toHaveBeenCalledWith({
                 email: "test@example.com",
                 password: "password123",
             })
         })
-
-        consoleSpy.mockRestore()
     })
 })

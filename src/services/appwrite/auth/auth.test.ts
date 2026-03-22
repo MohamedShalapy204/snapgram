@@ -118,8 +118,9 @@ describe('AuthService', () => {
             expect(result).toEqual(mockAccount);
         });
 
-        it('should return null if there is no active session', async () => {
+        it('should return null if there is no active session and NOT log an error', async () => {
             // Arrange
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             vi.mocked(account.get).mockRejectedValueOnce(new Error('Missing scope'));
 
             // Act
@@ -127,6 +128,8 @@ describe('AuthService', () => {
 
             // Assert
             expect(result).toBeNull();
+            expect(consoleSpy).not.toHaveBeenCalled();
+            consoleSpy.mockRestore();
         });
     });
 

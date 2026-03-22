@@ -3,8 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { signinSchema, type SigninSchema } from "../../../../utils/validation.ts"
-import { useAppDispatch } from "../../../../store/hooks.ts"
-import { setUser } from "../../../../store/features/authSlice.ts"
+import { useSignIn } from "../../../../hooks/queries/useAuth.ts"
 
 /**
  * SignInForm component for user login.
@@ -12,21 +11,18 @@ import { setUser } from "../../../../store/features/authSlice.ts"
  * Uses Zod for schema-based validation.
  */
 const SignInForm = () => {
-    const dispatch = useAppDispatch()
     const { register, handleSubmit, formState: { errors } } = useForm<SigninSchema>({
         resolver: zodResolver(signinSchema)
     })
 
-    const onSubmit = (data: SigninSchema) => {
-        // demo: log the form data and update redux
-        console.log("Demo signing in:", data)
-        dispatch(setUser({
-            id: "1",
-            name: "John Snap",
-            username: "john_snap",
-            email: data.email,
-            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=user_123"
-        }))
+    const { mutateAsync: signIn, isPending } = useSignIn()
+
+    const onSubmit = async (data: SigninSchema) => {
+        try {
+            await signIn(data)
+        } catch (error) {
+            console.error("SignInForm :: onSubmit error:", error)
+        }
     }
 
     return (
@@ -69,8 +65,8 @@ const SignInForm = () => {
                     {errors.password && <div className="label pt-1 pb-0 px-0.5"><span className="label-text-alt text-error font-medium">{errors.password.message}</span></div>}
                 </label>
 
-                <button type="submit" className="btn btn-primary w-full h-12 text-md font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
-                    Sign In
+                <button type="submit" disabled={isPending} className="btn btn-primary w-full h-12 text-md font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                    {isPending ? <span className="loading loading-spinner"></span> : "Sign In"}
                 </button>
             </form>
 

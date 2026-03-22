@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
-import { useSignUp } from './useAuth';
-import { createUserAccount, signInAccount } from '../../services/appwrite';
+import { useSignUp, useSignIn, useUser, useSignOut } from './useAuth';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount } from '../../services/appwrite';
+import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
 vi.mock('../../services/appwrite', () => ({
     createUserAccount: vi.fn(),
-    signInAccount: vi.fn()
+    signInAccount: vi.fn(),
+    getCurrentAccount: vi.fn(),
+    signOutAccount: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -25,7 +28,7 @@ describe('useSignUp Hook', () => {
         vi.mocked(createUserAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockAccount);
         vi.mocked(signInAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
 
-        const { result, store } = renderHook(() => useSignUp());
+        const { result, queryClient } = renderHook(() => useSignUp());
 
         // Act
         // We do not await directly here because we want to inspect intermediate states, 
@@ -37,8 +40,8 @@ describe('useSignUp Hook', () => {
             password: 'password123'
         });
 
-        // Assert Redux state before resolution (still false)
-        expect(store.getState().auth.isAuthenticated).toBe(false);
+        // Assert cache empty before resolution
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
 
         await mutationPromise;
 
@@ -59,15 +62,15 @@ describe('useSignUp Hook', () => {
             password: 'password123'
         });
 
-        // Verify Redux client state was updated correctly via onSuccess callback!
-        const state = store.getState();
-        expect(state.auth.isAuthenticated).toBe(true);
-        expect(state.auth.user).toEqual({
+        // Verify cache was updated correctly via onSuccess callback!
+        const user = queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER]);
+        expect(user).toEqual({
             id: 'user_123',
             name: 'Test User',
             username: 'test_user',
             email: 'test@example.com',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user_123'
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user_123',
+            verified: false
         });
     });
 
@@ -76,7 +79,7 @@ describe('useSignUp Hook', () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         vi.mocked(createUserAccount).mockRejectedValueOnce(new Error('Network error'));
 
-        const { result, store } = renderHook(() => useSignUp());
+        const { result, queryClient } = renderHook(() => useSignUp());
 
         // Act & Assert
         await expect(result.current.mutateAsync({
@@ -88,9 +91,183 @@ describe('useSignUp Hook', () => {
 
         expect(consoleSpy).toHaveBeenCalledWith("useSignUp :: error:", expect.any(Error));
 
-        // Assert Redux untouched
-        expect(store.getState().auth.isAuthenticated).toBe(false);
-        expect(store.getState().auth.user).toBeNull();
+        // Assert cache untouched
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
+
+        consoleSpy.mockRestore();
+    });
+});
+
+describe('useSignIn Hook', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should successfully sign in, fetch current account, and update redux state', async () => {
+        // Arrange
+        const mockCurrentAccount = {
+            $id: 'user_456',
+            name: 'Jane Doe',
+            email: 'jane@example.com',
+            emailVerification: true
+        };
+
+        vi.mocked(signInAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
+        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockCurrentAccount);
+
+        const { result, queryClient } = renderHook(() => useSignIn());
+
+        // Act
+        const mutationPromise = result.current.mutateAsync({
+            email: 'jane@example.com',
+            password: 'password123'
+        });
+
+        // Assert cache empty before resolution
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
+
+        await mutationPromise;
+
+        // Assert Network calls
+        await waitFor(() => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+
+        expect(signInAccount).toHaveBeenCalledWith({
+            email: 'jane@example.com',
+            password: 'password123'
+        });
+        expect(getCurrentAccount).toHaveBeenCalled();
+
+        // Verify cache updated via onSuccess callback
+        const user = queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER]);
+        expect(user).toEqual({
+            id: 'user_456',
+            name: 'Jane Doe',
+            username: 'janedoe',
+            email: 'jane@example.com',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user_456',
+            verified: true
+        });
+    });
+
+    it('should throw an error if account retrieval fails post-login', async () => {
+        // Arrange
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.mocked(signInAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
+        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
+
+        const { result, queryClient } = renderHook(() => useSignIn());
+
+        // Act & Assert
+        await expect(result.current.mutateAsync({
+            email: 'fail@example.com',
+            password: 'password123'
+        })).rejects.toThrow("Could not retrieve account details");
+
+        expect(consoleSpy).toHaveBeenCalledWith("useSignIn :: error:", expect.any(Error));
+
+        // Assert cache untouched
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeUndefined();
+
+        consoleSpy.mockRestore();
+    });
+});
+
+describe('useUser Hook', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should successfully fetch current user and return formatted data', async () => {
+        // Arrange
+        const mockAccount = {
+            $id: 'user_123',
+            name: 'Test User',
+            email: 'test@example.com',
+            emailVerification: true
+        };
+        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockAccount);
+
+        const { result } = renderHook(() => useUser());
+
+        // Assert
+        await waitFor(() => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+
+        expect(result.current.data).toEqual({
+            id: 'user_123',
+            name: 'Test User',
+            username: 'testuser',
+            email: 'test@example.com',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user_123',
+            verified: true
+        });
+    });
+
+    it('should return null if no session exists', async () => {
+        // Arrange
+        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
+
+        const { result } = renderHook(() => useUser());
+
+        // Assert
+        await waitFor(() => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+
+        expect(result.current.data).toBeNull();
+    });
+
+    it('should return null and not throw if getCurrentAccount fails', async () => {
+        // Arrange
+        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockRejectedValueOnce(new Error('Missing scope'));
+
+        const { result } = renderHook(() => useUser());
+
+        // Assert
+        await waitFor(() => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+
+        expect(result.current.data).toBeNull();
+    });
+});
+
+describe('useSignOut Hook', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should successfully sign out and clear query cache', async () => {
+        // Arrange
+        vi.mocked(signOutAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
+
+        const { result, queryClient } = renderHook(() => useSignOut());
+
+        // Pre-fill the cache
+        queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], { id: '123', name: 'Test', verified: true });
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeDefined();
+
+        // Act
+        await result.current.mutateAsync();
+
+        // Assert
+        expect(signOutAccount).toHaveBeenCalled();
+        expect(queryClient.getQueryData([QUERY_KEYS.GET_CURRENT_USER])).toBeNull();
+    });
+
+    it('should log error if sign out fails', async () => {
+        // Arrange
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.mocked(signOutAccount as unknown as () => Promise<unknown>).mockRejectedValueOnce(new Error('Network error'));
+
+        const { result } = renderHook(() => useSignOut());
+
+        // Act & Assert
+        await expect(result.current.mutateAsync()).rejects.toThrow('Network error');
+        expect(consoleSpy).toHaveBeenCalledWith("useSignOut :: error:", expect.any(Error));
 
         consoleSpy.mockRestore();
     });

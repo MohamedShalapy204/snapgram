@@ -1,14 +1,18 @@
 import { Navigate, Outlet } from "react-router-dom"
-import { useAppSelector } from "../../../../store/hooks.ts"
+import { useUser } from "../../../../hooks/queries/useAuth"
 
 /**
  * AuthLayout - Main layout for public authentication pages (SignIn, SignUp).
  * Following composition pattern and clean react code principles.
  */
 const AuthLayout = () => {
-    const { isAuthenticated } = useAppSelector((state) => state.auth)
+    const { data: user, isPending } = useUser()
 
-    if (isAuthenticated) {
+    if (isPending) {
+        return <div className="flex h-screen w-full items-center justify-center bg-base-100"><span role="status" className="loading loading-spinner loading-lg text-primary"></span></div>
+    }
+
+    if (user) {
         return <Navigate to="/" />
     }
 

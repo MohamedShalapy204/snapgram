@@ -42,8 +42,8 @@ export const signInAccount = async (user: SigninSchema) => {
 export const getCurrentAccount = async () => {
   try {
     return await account.get();
-  } catch (error) {
-    console.error("AuthService :: getCurrentAccount error:", error);
+  } catch {
+    // 401 is expected if there is no session, do not log it as an error
     return null;
   }
 };
@@ -56,5 +56,29 @@ export const signOutAccount = async () => {
     await account.deleteSession("current");
   } catch (error) {
     console.error("AuthService :: signOutAccount error:", error);
+  }
+};
+
+/**
+ * Sends a verification email to the current user.
+ */
+export const sendVerificationEmail = async (url: string) => {
+  try {
+    return await account.createVerification(url);
+  } catch (error) {
+    console.error("AuthService :: sendVerificationEmail error:", error);
+    throw error;
+  }
+};
+
+/**
+ * Updates the user's verification status using the secret from the email link.
+ */
+export const updateVerificationStatus = async (userId: string, secret: string) => {
+  try {
+    return await account.updateVerification(userId, secret);
+  } catch (error) {
+    console.error("AuthService :: updateVerificationStatus error:", error);
+    throw error;
   }
 };

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { type Post } from "../types/index.ts"
+import { QUERY_KEYS } from "../keys/queryKeys"
 
 const POSTS_DATA: Post[] = [
   {
@@ -20,7 +21,7 @@ const POSTS_DATA: Post[] = [
 
 export const usePosts = () => {
   return useQuery({
-    queryKey: ["posts"],
+    queryKey: [QUERY_KEYS.GET_POSTS],
     queryFn: async () => {
       // simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 500))

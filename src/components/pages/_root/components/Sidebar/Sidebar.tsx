@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom"
 import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare } from "react-icons/fa"
+import { MdVerified } from "react-icons/md"
 import { type INavLink } from "../../../../../types/index.ts"
-import { useAppDispatch } from "../../../../../store/hooks.ts"
-import { logout } from "../../../../../store/features/authSlice.ts"
+import { useUser, useSignOut } from "../../../../../hooks/queries/useAuth.ts"
 
 const Sidebar = () => {
-    const dispatch = useAppDispatch()
+    const { data: user } = useUser()
+    const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut()
     const { pathname } = useLocation()
 
     const navLinks: INavLink[] = [
@@ -27,12 +28,15 @@ const Sidebar = () => {
                 <div className="flex items-center gap-4">
                     <div className="avatar transition-transform group-hover:scale-105 duration-300">
                         <div className="w-14 h-14 rounded-2xl ring-2 ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-xl bg-orange-100/10 p-1">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user_123" alt="User profile" className="rounded-xl" />
+                            <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="User profile" className="rounded-xl" />
                         </div>
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-black text-lg leading-none tracking-tight truncate w-32 group-hover:text-primary transition-colors">John Snap</span>
-                        <span className="text-[11px] font-bold text-primary/60 uppercase tracking-widest mt-1 truncate w-32 opacity-80">@john_snap</span>
+                        <div className="flex items-center gap-1">
+                            <span className="font-black text-lg leading-none tracking-tight truncate w-24 group-hover:text-primary transition-colors">{user?.name || "Guest"}</span>
+                            {user?.verified && <MdVerified className="text-primary text-lg" title="Verified User" />}
+                        </div>
+                        <span className="text-[11px] font-bold text-primary/60 uppercase tracking-widest mt-1 truncate w-32 opacity-80">@{user?.username || "guest"}</span>
                     </div>
                 </div>
             </div>
@@ -57,12 +61,15 @@ const Sidebar = () => {
 
             <div className="mt-auto flex flex-col pt-8 border-t border-base-300/50">
                 <button
-                    onClick={() => dispatch(logout())}
+                    onClick={() => signOut()}
+                    disabled={isSigningOut}
                     className="btn btn-ghost justify-start group hover:bg-error/10 hover:text-error transition-all font-black text-md p-4 rounded-2xl active:scale-95"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    {isSigningOut ? <span className="loading loading-spinner"></span> : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    )}
                     Logout
                 </button>
             </div>

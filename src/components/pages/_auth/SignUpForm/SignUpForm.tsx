@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -6,15 +6,16 @@ import { signupSchema, type SignupSchema } from "../../../../utils/validation.ts
 import { useSignUp } from "../../../../hooks/queries/useAuth.ts"
 
 const SignUpForm = () => {
+    const navigate = useNavigate()
     const { register, handleSubmit, formState: { errors } } = useForm<SignupSchema>({
         resolver: zodResolver(signupSchema)
     })
-
     const { mutateAsync: signUp, isPending } = useSignUp()
 
     const onSubmit = async (data: SignupSchema) => {
         try {
             await signUp(data)
+            navigate("/verify-pending")
         } catch (error) {
             console.error("SignUpForm :: onSubmit error:", error)
         }
