@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
-import { useSignUp, useSignIn, useUser, useSignOut, useVerifyEmail, useSendVerificationEmail } from './useAuth';
+import { useSignUp, useSignIn, useUser, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUser } from './useAuth';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
@@ -12,7 +12,8 @@ vi.mock('../../services/appwrite', () => ({
     getCurrentAccount: vi.fn(),
     signOutAccount: vi.fn(),
     updateVerificationStatus: vi.fn(),
-    sendVerificationEmail: vi.fn()
+    sendVerificationEmail: vi.fn(),
+    updateAccountName: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -303,5 +304,35 @@ describe('useSendVerificationEmail Hook', () => {
 
         // Assert
         expect(sendVerificationEmail).toHaveBeenCalledWith('http://localhost/verify');
+    });
+});
+
+describe('useUpdateUser Hook', () => {
+    it('should successfully update user name and invalidate cache', async () => {
+        // Arrange
+        const mockUser = { $id: '123', name: 'New Name' };
+        vi.mocked(updateAccountName).mockResolvedValueOnce(mockUser as unknown as Awaited<ReturnType<typeof updateAccountName>>);
+        const { result, queryClient } = renderHook(() => useUpdateUser());
+        const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+        // Act
+        await result.current.mutateAsync('New Name');
+
+        // Assert
+        expect(updateAccountName).toHaveBeenCalledWith('New Name');
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
+    });
+
+    it('should log error if update fails', async () => {
+        // Arrange
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.mocked(updateAccountName).mockRejectedValueOnce(new Error('Update failed'));
+        const { result } = renderHook(() => useUpdateUser());
+
+        // Act & Assert
+        await expect(result.current.mutateAsync('Name')).rejects.toThrow('Update failed');
+        expect(consoleSpy).toHaveBeenCalledWith("useUpdateUser :: error:", expect.any(Error));
+
+        consoleSpy.mockRestore();
     });
 });

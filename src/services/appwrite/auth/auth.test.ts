@@ -5,6 +5,9 @@ import {
     signInAccount,
     getCurrentAccount,
     signOutAccount,
+    sendVerificationEmail,
+    updateVerificationStatus,
+    updateAccountName,
 } from './auth';
 import { account } from '../config';
 import type { SignupSchema, SigninSchema } from '../../../utils/validation';
@@ -16,6 +19,9 @@ vi.mock('../config', () => ({
         createEmailPasswordSession: vi.fn(),
         get: vi.fn(),
         deleteSession: vi.fn(),
+        createVerification: vi.fn(),
+        updateVerification: vi.fn(),
+        updateName: vi.fn(),
     },
 }));
 
@@ -143,6 +149,67 @@ describe('AuthService', () => {
 
             // Assert
             expect(account.deleteSession).toHaveBeenCalledWith('current');
+        });
+    });
+
+    describe('sendVerificationEmail', () => {
+        it('should call createVerification with the provided URL', async () => {
+            // Arrange
+            const mockUrl = 'https://example.com/verify';
+            const mockResponse = { $id: 'token_123' };
+            vi.mocked(account.createVerification).mockResolvedValueOnce(mockResponse as unknown as Models.Token);
+
+            // Act
+            const result = await sendVerificationEmail(mockUrl);
+
+            // Assert
+            expect(account.createVerification).toHaveBeenCalledWith(mockUrl);
+            expect(result).toEqual(mockResponse);
+        });
+
+        it('should throw error if createVerification fails', async () => {
+            vi.mocked(account.createVerification).mockRejectedValueOnce(new Error('Verification error'));
+            await expect(sendVerificationEmail('url')).rejects.toThrow('Verification error');
+        });
+    });
+
+    describe('updateVerificationStatus', () => {
+        it('should call updateVerification with userId and secret', async () => {
+            // Arrange
+            const mockToken = { $id: 'token_123' };
+            vi.mocked(account.updateVerification).mockResolvedValueOnce(mockToken as unknown as Models.Token);
+
+            // Act
+            const result = await updateVerificationStatus('user123', 'secret123');
+
+            // Assert
+            expect(account.updateVerification).toHaveBeenCalledWith('user123', 'secret123');
+            expect(result).toEqual(mockToken);
+        });
+
+        it('should throw error if updateVerification fails', async () => {
+            vi.mocked(account.updateVerification).mockRejectedValueOnce(new Error('Update failed'));
+            await expect(updateVerificationStatus('u', 's')).rejects.toThrow('Update failed');
+        });
+    });
+
+    describe('updateAccountName', () => {
+        it('should call updateName with the new name', async () => {
+            // Arrange
+            const mockUser = { $id: '123', name: 'New Name' };
+            vi.mocked(account.updateName).mockResolvedValueOnce(mockUser as unknown as Models.User<Models.Preferences>);
+
+            // Act
+            const result = await updateAccountName('New Name');
+
+            // Assert
+            expect(account.updateName).toHaveBeenCalledWith('New Name');
+            expect(result).toEqual(mockUser);
+        });
+
+        it('should throw error if updateName fails', async () => {
+            vi.mocked(account.updateName).mockRejectedValueOnce(new Error('Update name failed'));
+            await expect(updateAccountName('Name')).rejects.toThrow('Update name failed');
         });
     });
 });
