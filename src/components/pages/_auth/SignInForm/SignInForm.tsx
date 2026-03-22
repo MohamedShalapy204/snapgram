@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { signinSchema, type SigninSchema } from "../../../../utils/validation.ts"
 import { useSignIn } from "../../../../hooks/queries/useAuth.ts"
+import { useToast } from "../../../../hooks/useToast"
 
 /**
  * SignInForm component for user login.
@@ -15,13 +16,16 @@ const SignInForm = () => {
         resolver: zodResolver(signinSchema)
     })
 
+    const { success, error: toastError } = useToast()
     const { mutateAsync: signIn, isPending } = useSignIn()
 
     const onSubmit = async (data: SigninSchema) => {
         try {
             await signIn(data)
-        } catch (error) {
-            console.error("SignInForm :: onSubmit error:", error)
+            success("Welcome back! You've successfully signed in.")
+        } catch (err) {
+            toastError("Invalid email or password. Please try again.")
+            console.error("SignInForm :: onSubmit error:", err)
         }
     }
 

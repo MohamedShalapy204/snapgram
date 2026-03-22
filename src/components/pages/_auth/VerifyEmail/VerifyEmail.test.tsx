@@ -9,6 +9,15 @@ vi.mock('../../../../hooks/queries/useAuth', () => ({
     useUser: vi.fn(() => ({ data: null }))
 }));
 
+vi.mock('../../../../hooks/useToast', () => ({
+    useToast: vi.fn(() => ({
+        success: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warning: vi.fn(),
+    }))
+}));
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
@@ -35,7 +44,10 @@ describe('VerifyEmail Page', () => {
 
         render(<VerifyEmail />);
 
-        expect(mockMutate).toHaveBeenCalledWith({ userId: '123', secret: 'secret' });
+        expect(mockMutate).toHaveBeenCalledWith(
+            expect.objectContaining({ userId: '123', secret: 'secret' }),
+            expect.any(Object)
+        );
         expect(screen.getByText(/Verifying your account/i)).toBeInTheDocument();
     });
 

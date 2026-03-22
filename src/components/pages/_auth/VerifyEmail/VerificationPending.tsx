@@ -1,9 +1,22 @@
 import { Link } from "react-router-dom"
 import { useUser, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
+import { useToast } from "../../../../hooks/useToast"
 
 const VerificationPending = () => {
     const { data: user } = useUser()
+    const { success, error: toastError } = useToast()
     const { mutate: resend, isPending, isSuccess } = useSendVerificationEmail()
+
+    const handleResend = () => {
+        resend(`${window.location.origin}/verify-email`, {
+            onSuccess: () => {
+                success("Verification email has been resent!")
+            },
+            onError: () => {
+                toastError("Could not send email. Please try again later.")
+            }
+        })
+    }
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-base-100 p-6 text-center">
@@ -29,7 +42,7 @@ const VerificationPending = () => {
 
                         <div className="pt-4 space-y-3">
                             <button
-                                onClick={() => resend(`${window.location.origin}/verify-email`)}
+                                onClick={handleResend}
                                 disabled={isPending}
                                 className={`btn btn-primary w-full text-lg font-black tracking-wide rounded-2xl shadow-lg shadow-primary/20 ${isSuccess ? "btn-success" : ""}`}
                             >

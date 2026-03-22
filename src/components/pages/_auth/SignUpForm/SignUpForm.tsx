@@ -4,20 +4,24 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { signupSchema, type SignupSchema } from "../../../../utils/validation.ts"
 import { useSignUp } from "../../../../hooks/queries/useAuth.ts"
+import { useToast } from "../../../../hooks/useToast"
 
 const SignUpForm = () => {
     const navigate = useNavigate()
     const { register, handleSubmit, formState: { errors } } = useForm<SignupSchema>({
         resolver: zodResolver(signupSchema)
     })
+    const { success, error: toastError } = useToast()
     const { mutateAsync: signUp, isPending } = useSignUp()
 
     const onSubmit = async (data: SignupSchema) => {
         try {
             await signUp(data)
+            success("Account created successfully! We've sent a verification email.")
             navigate("/verify-pending")
-        } catch (error) {
-            console.error("SignUpForm :: onSubmit error:", error)
+        } catch (err) {
+            toastError("Registration failed. This email may already be in use.")
+            console.error("SignUpForm :: onSubmit error:", err)
         }
     }
 

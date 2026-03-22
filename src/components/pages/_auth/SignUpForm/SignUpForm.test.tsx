@@ -10,6 +10,15 @@ vi.mock("../../../../hooks/queries/useAuth", () => ({
         isPending: false
     }))
 }))
+
+vi.mock("../../../../hooks/useToast", () => ({
+    useToast: vi.fn(() => ({
+        success: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warning: vi.fn(),
+    }))
+}))
 /**
  * Helper to render component within a router and redux context
  */

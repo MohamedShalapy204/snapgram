@@ -1,11 +1,13 @@
 import { useEffect } from "react"
 import { useSearchParams, useNavigate, Link } from "react-router-dom"
 import { useVerifyEmail, useUser } from "../../../../hooks/queries/useAuth"
+import { useToast } from "../../../../hooks/useToast"
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const { data: user } = useUser()
+    const { success, error: toastError } = useToast()
     const { mutate: verify, isPending, isSuccess, isError } = useVerifyEmail()
 
     const userId = searchParams.get("userId")
@@ -13,9 +15,19 @@ const VerifyEmail = () => {
 
     useEffect(() => {
         if (userId && secret && !user?.verified) {
-            verify({ userId, secret })
+            verify(
+                { userId, secret },
+                {
+                    onSuccess: () => {
+                        success("Email verified successfully!")
+                    },
+                    onError: () => {
+                        toastError("Verification failed. Link may be invalid or expired.")
+                    }
+                }
+            )
         }
-    }, [userId, secret, verify, user?.verified])
+    }, [userId, secret, verify, user?.verified, success, toastError])
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-base-100 p-6 text-center">

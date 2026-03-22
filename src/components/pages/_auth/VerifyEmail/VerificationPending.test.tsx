@@ -8,6 +8,15 @@ vi.mock('../../../../hooks/queries/useAuth', () => ({
     useSendVerificationEmail: vi.fn(),
 }));
 
+vi.mock('../../../../hooks/useToast', () => ({
+    useToast: vi.fn(() => ({
+        success: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
+        warning: vi.fn(),
+    }))
+}));
+
 describe('VerificationPending Page', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -16,13 +25,13 @@ describe('VerificationPending Page', () => {
     it('should render user email and instructions', () => {
         vi.mocked(useUser).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as any);
+        } as unknown as ReturnType<typeof useUser>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: vi.fn(),
             isPending: false,
             isSuccess: false,
-        } as any);
+        } as unknown as ReturnType<typeof useSendVerificationEmail>);
 
         render(<VerificationPending />);
 
@@ -34,32 +43,35 @@ describe('VerificationPending Page', () => {
         const mockResend = vi.fn();
         vi.mocked(useUser).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as any);
+        } as unknown as ReturnType<typeof useUser>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: mockResend,
             isPending: false,
             isSuccess: false,
-        } as any);
+        } as unknown as ReturnType<typeof useSendVerificationEmail>);
 
         render(<VerificationPending />);
 
         const resendBtn = screen.getByRole('button', { name: /Resend Link/i });
         fireEvent.click(resendBtn);
 
-        expect(mockResend).toHaveBeenCalled();
+        expect(mockResend).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.any(Object)
+        );
     });
 
     it('should show success message after successful resend', () => {
         vi.mocked(useUser).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as any);
+        } as unknown as ReturnType<typeof useUser>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: vi.fn(),
             isPending: false,
             isSuccess: true,
-        } as any);
+        } as unknown as ReturnType<typeof useSendVerificationEmail>);
 
         render(<VerificationPending />);
 
