@@ -1,7 +1,7 @@
 import { ID, Query } from "appwrite";
-import { databases, appwriteConfig } from "../config";
-import { uploadFile, deleteFile, getFilePreview } from "../storage/storage";
-import type { NewPost } from "../../../types";
+import { databases, appwriteConfig } from "../../../config";
+import { uploadFile, deleteFile, getFilePreview } from "../../../storage/storage";
+import type { NewPost } from "../../../../../types";
 
 /**
  * Creates a new post document in the database and uploads the image.

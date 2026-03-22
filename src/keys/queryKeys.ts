@@ -4,7 +4,7 @@
  */
 export const QUERY_KEYS = {
     // Auth Keys
-    GET_CURRENT_USER: 'user',
+    GET_CURRENT_USER: 'userAccount',
 
     // Post Keys
     GET_POSTS: 'posts',

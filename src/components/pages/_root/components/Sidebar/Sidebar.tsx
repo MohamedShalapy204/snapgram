@@ -3,11 +3,13 @@ import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare, FaCog, FaRegHe
 import { MdVerified } from "react-icons/md"
 import { type INavLink } from "../../../../../types/index.ts"
 import { useUserAccount, useSignOut } from "../../../../../hooks/queries/useAuth.ts"
+import { useGetUserById } from "../../../../../hooks/queries/useUsers.ts"
 
 import { motion } from "motion/react"
 
 const Sidebar = () => {
-    const { data: user } = useUserAccount()
+    const { data: userAccount } = useUserAccount()
+    const { data: user } = useGetUserById(userAccount?.id || "")
     const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut()
     const { pathname } = useLocation()
 
@@ -38,22 +40,22 @@ const Sidebar = () => {
                     <div className="flex items-center gap-4">
                         <div className="avatar transition-transform group-hover:scale-105 duration-300">
                             <div className="w-14 h-14 rounded-2xl ring-2 ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-xl bg-orange-100/10 p-1">
-                                <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="User profile" className="rounded-xl" />
+                                <img src={user?.imageUrl || userAccount?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="User profile" className="rounded-xl" />
                             </div>
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-1">
-                                <span className="font-black text-lg leading-none tracking-tight truncate w-24 group-hover:text-primary transition-colors">{user?.name || "Guest"}</span>
-                                {user?.verified && <MdVerified className="text-primary text-lg" title="Verified User" />}
+                                <span className="font-black text-lg leading-none tracking-tight truncate w-24 group-hover:text-primary transition-colors">{user?.name || userAccount?.name || "Guest"}</span>
+                                {userAccount?.verified && <MdVerified className="text-primary text-lg" title="Verified User" />}
                             </div>
-                            <span className="text-[11px] font-bold text-primary/60 uppercase tracking-widest mt-1 truncate w-32 opacity-80">@{user?.username || "guest"}</span>
+                            <span className="text-[11px] font-bold text-primary/60 tracking-widest mt-1 truncate w-32 opacity-80">@{user?.username || userAccount?.username || "guest"}</span>
                         </div>
                     </div>
                 </div>
 
                 <ul tabIndex={0} className="dropdown-content z-1 p-2 shadow-2xl bg-base-100 border border-base-300 rounded-3xl w-full mb-4 animate-in slide-in-from-bottom-2 duration-300">
                     <li>
-                        <Link to={`/profile/${user?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-2xl font-bold transition-colors">
+                        <Link to={`/profile/${userAccount?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-2xl font-bold transition-colors">
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

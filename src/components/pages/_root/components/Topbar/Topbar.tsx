@@ -1,10 +1,12 @@
 import { Link, useLocation } from "react-router-dom"
 import { FaHome, FaCog, FaRegHeart, FaRegPaperPlane, FaCompass, FaUsers, FaRegBookmark, FaPlusSquare } from "react-icons/fa"
 import { useUserAccount, useSignOut } from "../../../../../hooks/queries/useAuth"
+import { useGetUserById } from "../../../../../hooks/queries/useUsers"
 import { motion } from "motion/react"
 
 const Topbar = () => {
-    const { data: user } = useUserAccount()
+    const { data: userAccount } = useUserAccount()
+    const { data: user } = useGetUserById(userAccount?.id || "")
     const { mutate: signOut, isPending } = useSignOut()
     const { pathname } = useLocation()
 
@@ -35,13 +37,13 @@ const Topbar = () => {
                             className="avatar active:scale-90 transition-transform duration-300 p-0.5 ring-1 ring-primary/20 rounded-full hover:ring-primary/40"
                         >
                             <div className="w-9 h-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1 overflow-hidden shadow-lg border-2 border-primary/40 p-0.5 bg-linear-to-br from-indigo-100 to-blue-200">
-                                <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="User avatar" className="rounded-full" />
+                                <img src={user?.imageUrl || userAccount?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="User avatar" className="rounded-full" />
                             </div>
                         </div>
 
                         <ul tabIndex={0} className="dropdown-content z-1 p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-52 mt-4 animate-in slide-in-from-top-2 duration-300">
                             <li>
-                                <Link to={`/profile/${user?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-xl font-bold transition-colors">
+                                <Link to={`/profile/${user?.$id || userAccount?.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-xl font-bold transition-colors">
                                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

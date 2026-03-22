@@ -25,6 +25,5 @@ dist-ssr
 
 # more
 .agents/*
-project context.md
 .env
-pencil-new.pen
+context/*
