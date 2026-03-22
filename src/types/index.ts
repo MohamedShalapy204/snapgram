@@ -12,11 +12,22 @@ export interface SignUpFormData {
 }
 
 export interface Post {
-  id: number
-  author: string
-  avatar: string
-  content: string
-  image: string
+  $id: string
+  caption: string
+  imageUrl: string
+  location?: string
+  tags?: string[]
+  creator: User
+  likes: string[] // List of user IDs who liked the post
+  save: string[] // List of user IDs who saved the post
+  $createdAt: string
+}
+
+export interface NewPost {
+  caption: string
+  file: File[]
+  location?: string
+  tags?: string
 }
 
 export interface INavLink {

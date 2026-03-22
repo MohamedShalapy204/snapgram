@@ -5,7 +5,8 @@ import { useVerifyEmail } from '../../../../hooks/queries/useAuth';
 
 // Mock the hook
 vi.mock('../../../../hooks/queries/useAuth', () => ({
-    useVerifyEmail: vi.fn()
+    useVerifyEmail: vi.fn(),
+    useUser: vi.fn(() => ({ data: null }))
 }));
 
 const mockNavigate = vi.fn();
@@ -30,7 +31,7 @@ describe('VerifyEmail Page', () => {
             isPending: true,
             isSuccess: false,
             isError: false,
-        } as any);
+        } as unknown as ReturnType<typeof useVerifyEmail>);
 
         render(<VerifyEmail />);
 
@@ -44,7 +45,7 @@ describe('VerifyEmail Page', () => {
             isPending: false,
             isSuccess: true,
             isError: false,
-        } as any);
+        } as unknown as ReturnType<typeof useVerifyEmail>);
 
         render(<VerifyEmail />);
 
@@ -60,7 +61,7 @@ describe('VerifyEmail Page', () => {
             isPending: false,
             isSuccess: false,
             isError: true,
-        } as any);
+        } as unknown as ReturnType<typeof useVerifyEmail>);
 
         render(<VerifyEmail />);
 

@@ -16,7 +16,7 @@ const Saved = () => {
                 </p>
                 <div className="grid grid-cols-3 lg:grid-cols-4 gap-4 p-8 bg-base-300/30 rounded-3xl border border-base-300 backdrop-blur-sm">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <div key={i} className="aspect-[3/4] bg-base-300 rounded-2xl animate-pulse overflow-hidden">
+                        <div key={i} className="aspect-3/4 bg-base-300 rounded-2xl animate-pulse overflow-hidden">
                             <div className="h-full w-full bg-linear-to-br from-base-300 via-base-200 to-base-300 rounded-2xl"></div>
                         </div>
                     ))}

@@ -16,6 +16,14 @@ export const signinSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 })
 
+export const postSchema = z.object({
+  caption: z.string().min(5, "Caption must be at least 5 characters").max(2200, "Caption too long"),
+  file: z.custom<File[]>(),
+  location: z.string().min(2, "Location must be at least 2 characters").max(100).optional().or(z.literal('')),
+  tags: z.string().optional()
+})
+
 // Inferred types for convenience
 export type SignupSchema = z.infer<typeof signupSchema>
 export type SigninSchema = z.infer<typeof signinSchema>
+export type PostSchema = z.infer<typeof postSchema>
