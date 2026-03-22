@@ -1,12 +1,13 @@
 import { useForm } from "react-hook-form"
 import { useUser, useUpdateUser } from "../../../../hooks/queries/useAuth"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { MdVerified } from "react-icons/md"
+import { useToast } from "../../../../hooks/useToast"
 
 const AccountSettings = () => {
     const { data: user } = useUser()
     const { mutate: updateUser, isPending: isUpdating } = useUpdateUser()
-    const [successMessage, setSuccessMessage] = useState("")
+    const { success, error: toastError } = useToast()
 
     const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -21,11 +22,12 @@ const AccountSettings = () => {
     }, [user, reset])
 
     const onSubmit = (data: { name: string }) => {
-        setSuccessMessage("")
         updateUser(data.name, {
             onSuccess: () => {
-                setSuccessMessage("Profile updated successfully!")
-                setTimeout(() => setSuccessMessage(""), 5000)
+                success("Profile updated successfully!")
+            },
+            onError: () => {
+                toastError("Failed to update profile")
             }
         })
     }
@@ -74,12 +76,6 @@ const AccountSettings = () => {
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <h3 className="text-lg font-black uppercase tracking-widest text-base-content/40 ml-1">Personal information</h3>
                             <div className="p-8 rounded-3xl bg-base-200/50 border border-base-300 shadow-sm space-y-6">
-                                {successMessage && (
-                                    <div className="alert alert-success rounded-2xl font-bold p-3 animate-in fade-in slide-in-from-top-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span>{successMessage}</span>
-                                    </div>
-                                )}
 
                                 <div className="form-control w-full">
                                     <label className="label">

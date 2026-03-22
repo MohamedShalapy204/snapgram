@@ -38,3 +38,16 @@ export interface AuthState {
   isAuthenticated: boolean
   user: User | null
 }
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
+}
+
+export interface ToastState {
+  toasts: Toast[];
+}

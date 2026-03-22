@@ -17,9 +17,12 @@ import VerifyEmail from "./components/pages/_auth/VerifyEmail/VerifyEmail"
 import VerificationPending from "./components/pages/_auth/VerifyEmail/VerificationPending"
 import VerifyLayout from "./components/pages/_auth/VerifyLayout"
 
+import ToastContainer from "./components/shared/toast/ToastContainer"
+
 const App = () => {
   return (
     <main className="min-h-dvh">
+      <ToastContainer />
       <Routes>
         {/* public routes */}
         <Route element={<AuthLayout />}>
