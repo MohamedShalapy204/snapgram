@@ -45,7 +45,7 @@ const Home = () => {
                                 <div className="flex items-center gap-4">
                                     <div className="avatar transition-transform group-hover:scale-105 duration-300">
                                         <div className="w-11 h-11 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-2xl border-2 border-primary/40 p-1 bg-linear-to-br from-indigo-100 to-blue-200">
-                                            <img src={post.creator.avatar} alt={post.creator.name} className="rounded-xl" />
+                                            <img src={post.creator.imageUrl} alt={post.creator.name} className="rounded-xl" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col">

@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '../../../../tests/test-utils';
 import VerifyLayout from './VerifyLayout';
-import { useUser } from '../../../hooks/queries/useAuth';
+import { useUserAccount } from '../../../hooks/queries/useAuth';
 import { Route, Routes } from 'react-router-dom';
 
 vi.mock('../../../hooks/queries/useAuth', () => ({
-    useUser: vi.fn()
+    useUserAccount: vi.fn()
 }));
 
 describe('VerifyLayout', () => {
@@ -14,10 +14,10 @@ describe('VerifyLayout', () => {
     });
 
     it('should show loading spinner when data is pending', () => {
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: null,
             isPending: true
-        } as any);
+        } as unknown as ReturnType<typeof useUserAccount>);
 
         render(<VerifyLayout />);
 
@@ -26,10 +26,10 @@ describe('VerifyLayout', () => {
     });
 
     it('should render children when data is loaded', () => {
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: { id: '123' },
             isPending: false
-        } as any);
+        } as unknown as ReturnType<typeof useUserAccount>);
 
         render(
             <Routes>

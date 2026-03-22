@@ -1,28 +1,48 @@
 import { useForm } from "react-hook-form"
-import { useUser, useUpdateUser } from "../../../../hooks/queries/useAuth"
+import { useUserAccount } from "../../../../hooks/queries/useAuth"
+import { useGetUserById, useUpdateUserDB } from "../../../../hooks/queries/useUsers"
 import { useEffect } from "react"
 import { MdVerified } from "react-icons/md"
 import { useToast } from "../../../../hooks/useToast"
+import FileUploader from "../../../shared/FileUploader"
 
 const AccountSettings = () => {
-    const { data: user } = useUser()
-    const { mutate: updateUser, isPending: isUpdating } = useUpdateUser()
+    const { data: authUser } = useUserAccount()
+    const { data: user, isLoading: isLoadingUser } = useGetUserById(authUser?.id || "")
+    const { mutate: updateUser, isPending: isUpdating } = useUpdateUserDB()
     const { success, error: toastError } = useToast()
 
-    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
+    const { register, handleSubmit, reset, setValue, formState: { isDirty } } = useForm({
         defaultValues: {
-            name: user?.name || ""
+            name: user?.name || "",
+            bio: user?.bio || "",
+            file: [] as File[],
         }
     })
 
     useEffect(() => {
         if (user) {
-            reset({ name: user.name })
+            reset({
+                name: user.name,
+                bio: user.bio || "",
+                file: [],
+            })
         }
     }, [user, reset])
 
-    const onSubmit = (data: { name: string }) => {
-        updateUser(data.name, {
+    const onSubmit = (data: { name: string; bio: string; file: File[] }) => {
+        if (!user) return;
+
+        updateUser({
+            user: {
+                userId: user.$id,
+                name: data.name,
+                bio: data.bio,
+                imageId: user.imageId,
+                imageUrl: user.imageUrl,
+            },
+            file: data.file,
+        }, {
             onSuccess: () => {
                 success("Profile updated successfully!")
             },
@@ -30,6 +50,14 @@ const AccountSettings = () => {
                 toastError("Failed to update profile")
             }
         })
+    }
+
+    if (isLoadingUser) {
+        return (
+            <div className="flex h-full w-full items-center justify-center p-20">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        )
     }
 
     return (
@@ -44,17 +72,16 @@ const AccountSettings = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-1 space-y-6">
-                        <div className="p-6 rounded-3xl bg-base-200 border border-base-300 space-y-6 shadow-sm">
+                        <div className="p-6 rounded-3xl bg-base-200 border border-base-300 space-y-6 shadow-sm sticky top-24">
                             <div className="flex flex-col items-center text-center space-y-4">
-                                <div className="avatar">
-                                    <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 shadow-xl">
-                                        <img src={user?.avatar} alt={user?.name} />
-                                    </div>
-                                </div>
+                                <FileUploader
+                                    fieldChange={(files) => setValue("file", files, { shouldDirty: true })}
+                                    mediaUrl={user?.imageUrl || ""}
+                                />
                                 <div>
                                     <div className="flex items-center justify-center gap-1">
                                         <h2 className="text-xl font-bold truncate max-w-[150px]">{user?.name}</h2>
-                                        {user?.verified && <MdVerified className="text-primary" />}
+                                        {authUser?.verified && <MdVerified className="text-primary" />}
                                     </div>
                                     <p className="text-sm font-medium text-base-content/50 italic truncate max-w-[150px]">@{user?.username}</p>
                                 </div>
@@ -63,9 +90,9 @@ const AccountSettings = () => {
                             <div className="stats stats-vertical w-full bg-base-100/50 rounded-2xl border border-base-300/50">
                                 <div className="stat">
                                     <div className="stat-title text-[10px] uppercase font-black tracking-widest opacity-50">Status</div>
-                                    <div className={`stat-value text-sm font-bold flex items-center gap-2 ${user?.verified ? 'text-success' : 'text-warning'}`}>
-                                        <div className={`h-2 w-2 rounded-full ${user?.verified ? 'bg-success' : 'bg-warning animate-pulse'}`}></div>
-                                        {user?.verified ? 'Verified' : 'Pending Verification'}
+                                    <div className={`stat-value text-sm font-bold flex items-center gap-2 ${authUser?.verified ? 'text-success' : 'text-warning'}`}>
+                                        <div className={`h-2 w-2 rounded-full ${authUser?.verified ? 'bg-success' : 'bg-warning animate-pulse'}`}></div>
+                                        {authUser?.verified ? 'Verified' : 'Pending Verification'}
                                     </div>
                                 </div>
                             </div>
@@ -85,6 +112,17 @@ const AccountSettings = () => {
                                         type="text"
                                         {...register("name", { required: true })}
                                         className="input input-bordered rounded-2xl bg-base-100 border-base-300 font-medium focus:ring-2 focus:ring-primary/20 "
+                                    />
+                                </div>
+
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Bio</span>
+                                    </label>
+                                    <textarea
+                                        {...register("bio")}
+                                        className="textarea textarea-bordered rounded-2xl bg-base-100 border-base-300 font-medium h-32 resize-none focus:ring-2 focus:ring-primary/20 "
+                                        placeholder="Tell us about yourself..."
                                     />
                                 </div>
 

@@ -21,7 +21,7 @@ export const saveUserToDB = async (user: {
             {
                 email: user.email,
                 name: user.name,
-                userName: user.username,
+                username: user.username,
                 imageUrl: user.imageUrl,
                 imageId: user.imageId,
             }
@@ -68,10 +68,10 @@ export const updateUser = async (user: {
             appwriteConfig.usersCollectionId,
             user.userId,
             {
-                name: user.name,
-                bio: user.bio,
-                imageUrl: user.imageUrl,
-                imageId: user.imageId,
+                ...(user.name && { name: user.name }),
+                ...(user.bio && { bio: user.bio }),
+                ...(user.imageUrl && { imageUrl: user.imageUrl }),
+                ...(user.imageId && { imageId: user.imageId }),
             }
         );
 
@@ -108,7 +108,7 @@ export const searchUsers = async (searchTerm: string) => {
         const users = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.usersCollectionId,
-            [Query.or([Query.search("name", searchTerm), Query.search("userName", searchTerm)])]
+            [Query.or([Query.search("name", searchTerm), Query.search("username", searchTerm)])]
         );
 
         return users;

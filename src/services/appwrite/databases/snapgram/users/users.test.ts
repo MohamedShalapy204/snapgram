@@ -11,8 +11,13 @@ vi.mock('../../../config', () => ({
         listDocuments: vi.fn(),
     },
     appwriteConfig: {
+        endpoint: 'test-endpoint',
+        projectId: 'test-project',
         databaseId: 'test-db',
+        storageId: 'test-storage',
         usersCollectionId: 'test-users',
+        postsCollectionId: 'test-posts',
+        savesCollectionId: 'test-saves',
     },
 }));
 
@@ -43,7 +48,7 @@ describe('UserService', () => {
                 {
                     email: mockUser.email,
                     name: mockUser.name,
-                    userName: mockUser.username,
+                    username: mockUser.username,
                     imageUrl: mockUser.imageUrl,
                     imageId: mockUser.imageId,
                 }
@@ -74,7 +79,7 @@ describe('UserService', () => {
                 'test-db',
                 'test-users',
                 '123',
-                { bio: 'New Bio', name: undefined, imageUrl: undefined, imageId: undefined }
+                { bio: 'New Bio' }
             );
         });
     });
@@ -102,7 +107,7 @@ describe('UserService', () => {
             expect(databases.listDocuments).toHaveBeenCalledWith(
                 'test-db',
                 'test-users',
-                [Query.or([Query.search("name", "test"), Query.search("userName", "test")])]
+                [Query.or([Query.search("name", "test"), Query.search("username", "test")])]
             );
         });
     });

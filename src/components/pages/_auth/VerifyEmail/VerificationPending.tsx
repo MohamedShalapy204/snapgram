@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom"
-import { useUser, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
+import { useUserAccount, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
 import { useToast } from "../../../../hooks/useToast"
 
 const VerificationPending = () => {
-    const { data: user } = useUser()
+    const { data: user } = useUserAccount()
     const { success, error: toastError } = useToast()
     const { mutate: resend, isPending, isSuccess } = useSendVerificationEmail()
 

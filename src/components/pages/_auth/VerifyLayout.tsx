@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom"
-import { useUser } from "../../../hooks/queries/useAuth"
+import { useUserAccount } from "../../../hooks/queries/useAuth"
 
 /**
  * VerifyLayout - Layout for verification-related pages (VerifyEmail, VerificationPending).
@@ -7,7 +7,7 @@ import { useUser } from "../../../hooks/queries/useAuth"
  * or just provides a consistent centered design.
  */
 const VerifyLayout = () => {
-    const { isPending } = useUser()
+    const { isPending } = useUserAccount()
 
     if (isPending) {
         return (

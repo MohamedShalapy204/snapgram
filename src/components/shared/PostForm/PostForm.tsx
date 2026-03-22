@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { postSchema, type PostSchema } from "../../../utils/validation";
 import { useCreatePost } from "../../../hooks/queries/usePosts";
-import { useUser } from "../../../hooks/queries/useAuth";
+import { useUserAccount } from "../../../hooks/queries/useAuth";
 import { useToast } from "../../../hooks/useToast";
 import FileUploader from "../FileUploader";
 import type { Post } from "../../../types";
@@ -15,7 +15,7 @@ type PostFormProps = {
 
 const PostForm = ({ post, action }: PostFormProps) => {
     const { mutate: createPost, isPending: isCreating } = useCreatePost();
-    const { data: user } = useUser();
+    const { data: user } = useUserAccount();
     const { success, error } = useToast();
     const navigate = useNavigate();
 

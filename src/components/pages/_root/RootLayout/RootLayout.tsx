@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Topbar from "../components/Topbar"
-import { useUser, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
+import { useUserAccount, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
 import { MdInfoOutline } from "react-icons/md"
 
 /**
@@ -9,7 +9,7 @@ import { MdInfoOutline } from "react-icons/md"
  * Following react-ecosystem guidelines: separate layout logic from components.
  */
 const RootLayout = () => {
-    const { data: user, isPending } = useUser()
+    const { data: user, isPending } = useUserAccount()
     const { mutate: sendVerification, isPending: isSending } = useSendVerificationEmail()
 
     if (isPending) {

@@ -6,7 +6,7 @@ import { useVerifyEmail } from '../../../../hooks/queries/useAuth';
 // Mock the hook
 vi.mock('../../../../hooks/queries/useAuth', () => ({
     useVerifyEmail: vi.fn(),
-    useUser: vi.fn(() => ({ data: null }))
+    useUserAccount: vi.fn(() => ({ data: null }))
 }));
 
 vi.mock('../../../../hooks/useToast', () => ({

@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom"
-import { useUser } from "../../../../hooks/queries/useAuth"
+import { useUserAccount } from "../../../../hooks/queries/useAuth"
 
 const Profile = () => {
     const { id } = useParams()
-    const { data: currentUser } = useUser()
+    const { data: currentUser } = useUserAccount()
     const isOwner = currentUser?.id === id
 
     return (

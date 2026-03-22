@@ -1,12 +1,12 @@
 import { useEffect } from "react"
 import { useSearchParams, useNavigate, Link } from "react-router-dom"
-import { useVerifyEmail, useUser } from "../../../../hooks/queries/useAuth"
+import { useVerifyEmail, useUserAccount } from "../../../../hooks/queries/useAuth"
 import { useToast } from "../../../../hooks/useToast"
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const { data: user } = useUser()
+    const { data: user } = useUserAccount()
     const { success, error: toastError } = useToast()
     const { mutate: verify, isPending, isSuccess, isError } = useVerifyEmail()
 

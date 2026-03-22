@@ -4,14 +4,14 @@ import { MemoryRouter } from "react-router-dom"
 import { Provider } from "react-redux"
 import { combineReducers, configureStore } from "@reduxjs/toolkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import toastReducer from "../src/store/slices/toastSlice.ts"
 import type { RootState, AppStore } from "../src/store/store.ts"
 
 /**
  * Combined reducer for use in tests to match the store's structure and satisfy RTK types.
  */
 const rootReducer = combineReducers({
-    // Keep empty for now until new features require client state
-    default: (state = null) => state
+    toast: toastReducer
 })
 
 /**

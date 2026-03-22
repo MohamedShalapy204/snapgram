@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
-import { useSignUp, useSignIn, useUser, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUser } from './useAuth';
+import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUser } from './useAuth';
 import type { Models } from 'appwrite';
 import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
@@ -13,7 +13,8 @@ vi.mock('../../services/appwrite', () => ({
     signOutAccount: vi.fn(),
     updateVerificationStatus: vi.fn(),
     sendVerificationEmail: vi.fn(),
-    updateAccountName: vi.fn()
+    updateAccountName: vi.fn(),
+    saveUserToDB: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -178,7 +179,7 @@ describe('useSignIn Hook', () => {
     });
 });
 
-describe('useUser Hook', () => {
+describe('useUserAccount Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -193,7 +194,7 @@ describe('useUser Hook', () => {
         };
         vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(mockAccount);
 
-        const { result } = renderHook(() => useUser());
+        const { result } = renderHook(() => useUserAccount());
 
         // Assert
         await waitFor(() => {
@@ -214,7 +215,7 @@ describe('useUser Hook', () => {
         // Arrange
         vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce(null);
 
-        const { result } = renderHook(() => useUser());
+        const { result } = renderHook(() => useUserAccount());
 
         // Assert
         await waitFor(() => {
@@ -228,7 +229,7 @@ describe('useUser Hook', () => {
         // Arrange
         vi.mocked(getCurrentAccount).mockRejectedValueOnce(new Error('Missing scope'));
 
-        const { result } = renderHook(() => useUser());
+        const { result } = renderHook(() => useUserAccount());
 
         // Assert
         await waitFor(() => {

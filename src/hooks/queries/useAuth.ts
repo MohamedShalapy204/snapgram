@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { UserAccount } from '../../types';
@@ -37,6 +37,16 @@ export const useSignUp = () => {
 
             // Sign in immediately after creating account
             await signInAccount({ email: data.email, password: data.password });
+
+            // Sync user to database
+            await saveUserToDB({
+                userId: newAccount.$id,
+                email: newAccount.email,
+                name: newAccount.name,
+                username: data.username,
+                imageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newAccount.$id}`,
+                imageId: "",
+            });
 
             // Automatically send the verification email after signing in
             await sendVerificationEmail(`${window.location.origin}/verify-email`);
@@ -115,7 +125,7 @@ export const useSignOut = () => {
  * Custom React Query Hook for retrieving the authenticated user's profile.
  * Acts as the single source of truth for auth status, removing the need for Redux.
  */
-export const useUser = () => {
+export const useUserAccount = () => {
     return useQuery<UserAccount | null, Error>({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: async () => {

@@ -1,56 +1,7 @@
-import { ID, Query, ImageGravity } from "appwrite";
-import { databases, storage, appwriteConfig } from "../config";
+import { ID, Query } from "appwrite";
+import { databases, appwriteConfig } from "../config";
+import { uploadFile, deleteFile, getFilePreview } from "../storage/storage";
 import type { NewPost } from "../../../types";
-
-/**
- * Uploads a file to Appwrite storage and returns its resource summary.
- */
-export const uploadFile = async (file: File) => {
-    try {
-        const uploadedFile = await storage.createFile(
-            appwriteConfig.storageId,
-            ID.unique(),
-            file
-        );
-
-        return uploadedFile;
-    } catch (error) {
-        console.error("PostService :: uploadFile error:", error);
-        throw error;
-    }
-};
-
-/**
- * Returns the public URL for an uploaded file.
- */
-export const getFilePreview = (fileId: string) => {
-    try {
-        const fileUrl = storage.getFilePreview(
-            appwriteConfig.storageId,
-            fileId,
-            2000,
-            2000,
-            ImageGravity.Top,
-            100
-        );
-
-        return fileUrl;
-    } catch (error) {
-        console.error("PostService :: getFilePreview error:", error);
-        return "";
-    }
-};
-
-/**
- * Deletes a file from storage.
- */
-export const deleteFile = async (fileId: string) => {
-    try {
-        await storage.deleteFile(appwriteConfig.storageId, fileId);
-    } catch (error) {
-        console.error("PostService :: deleteFile error:", error);
-    }
-};
 
 /**
  * Creates a new post document in the database and uploads the image.
@@ -76,7 +27,7 @@ export const createPost = async (post: NewPost, userId: string) => {
         // Create the document in Appwrite Database
         const newPost = await databases.createDocument(
             appwriteConfig.databaseId,
-            appwriteConfig.postCollectionId,
+            appwriteConfig.postsCollectionId,
             ID.unique(),
             {
                 creator: userId,
@@ -107,7 +58,7 @@ export const getRecentPosts = async () => {
     try {
         const posts = await databases.listDocuments(
             appwriteConfig.databaseId,
-            appwriteConfig.postCollectionId,
+            appwriteConfig.postsCollectionId,
             [Query.orderDesc("$createdAt"), Query.limit(20)]
         );
 

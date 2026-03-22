@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "../../../../../tests/test-utils.tsx"
 import AuthLayout from "./AuthLayout.tsx"
-import { useUser } from "../../../../hooks/queries/useAuth"
+import { useUserAccount } from "../../../../hooks/queries/useAuth"
 import type { UseQueryResult } from "@tanstack/react-query"
 import type { UserAccount } from "../../../../types/index.ts"
 
@@ -15,12 +15,12 @@ vi.mock("react-router-dom", async () => {
     }
 })
 
-// Mock the useUser hook from useAuth module
+// Mock the useUserAccount hook from useAuth module
 vi.mock("../../../../hooks/queries/useAuth", async () => {
     const actual = await vi.importActual("../../../../hooks/queries/useAuth") as object
     return {
         ...actual,
-        useUser: vi.fn()
+        useUserAccount: vi.fn()
     }
 })
 
@@ -28,7 +28,7 @@ describe("AuthLayout", () => {
     // Negative Testing: Redirection when already authenticated
     it("should redirect to root path if user is already authenticated", () => {
         // Arrange
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: { id: "1", name: "Test User", username: "test", email: "test@snap.com", avatar: "" },
             isPending: false
         } as unknown as UseQueryResult<UserAccount | null, Error>)
@@ -43,7 +43,7 @@ describe("AuthLayout", () => {
 
     it("should show loading spinner when user data is pending", () => {
         // Arrange
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: null,
             isPending: true
         } as unknown as UseQueryResult<UserAccount | null, Error>)
@@ -58,7 +58,7 @@ describe("AuthLayout", () => {
     // Positive Testing: Successful Rendering for Guests
     it("should render the authentication layout with outlet and image for guests", () => {
         // Arrange
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: null,
             isPending: false
         } as unknown as UseQueryResult<UserAccount | null, Error>)
@@ -75,7 +75,7 @@ describe("AuthLayout", () => {
     // Boundary/Integration: Accessibility checks
     it("should have clear semantic layout and alt text on background image", () => {
         // Arrange
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: null,
             isPending: false
         } as unknown as UseQueryResult<UserAccount | null, Error>)

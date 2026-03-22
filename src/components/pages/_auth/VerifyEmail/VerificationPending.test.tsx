@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '../../../../../tests/test-utils';
 import VerificationPending from './VerificationPending';
-import { useUser, useSendVerificationEmail } from '../../../../hooks/queries/useAuth';
+import { useUserAccount, useSendVerificationEmail } from '../../../../hooks/queries/useAuth';
 
 vi.mock('../../../../hooks/queries/useAuth', () => ({
-    useUser: vi.fn(),
+    useUserAccount: vi.fn(),
     useSendVerificationEmail: vi.fn(),
 }));
 
@@ -23,9 +23,9 @@ describe('VerificationPending Page', () => {
     });
 
     it('should render user email and instructions', () => {
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as unknown as ReturnType<typeof useUser>);
+        } as unknown as ReturnType<typeof useUserAccount>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: vi.fn(),
@@ -41,9 +41,9 @@ describe('VerificationPending Page', () => {
 
     it('should call resend on button click', () => {
         const mockResend = vi.fn();
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as unknown as ReturnType<typeof useUser>);
+        } as unknown as ReturnType<typeof useUserAccount>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: mockResend,
@@ -63,9 +63,9 @@ describe('VerificationPending Page', () => {
     });
 
     it('should show success message after successful resend', () => {
-        vi.mocked(useUser).mockReturnValue({
+        vi.mocked(useUserAccount).mockReturnValue({
             data: { email: 'test@example.com' }
-        } as unknown as ReturnType<typeof useUser>);
+        } as unknown as ReturnType<typeof useUserAccount>);
 
         vi.mocked(useSendVerificationEmail).mockReturnValue({
             mutate: vi.fn(),

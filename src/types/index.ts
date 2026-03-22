@@ -17,7 +17,7 @@ export interface Post {
   imageUrl: string
   location?: string
   tags?: string[]
-  creator: UserAccount
+  creator: User
   likes: string[] // List of user IDs who liked the post
   save: string[] // List of user IDs who saved the post
   $createdAt: string
@@ -48,7 +48,7 @@ export interface UserAccount {
 export interface User {
   $id: string
   name: string
-  userName: string
+  username: string
   email: string
   bio: string
   imageId: string

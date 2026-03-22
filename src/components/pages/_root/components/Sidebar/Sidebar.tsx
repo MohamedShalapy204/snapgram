@@ -2,12 +2,12 @@ import { Link, useLocation } from "react-router-dom"
 import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare, FaCog, FaRegHeart, FaRegPaperPlane } from "react-icons/fa"
 import { MdVerified } from "react-icons/md"
 import { type INavLink } from "../../../../../types/index.ts"
-import { useUser, useSignOut } from "../../../../../hooks/queries/useAuth.ts"
+import { useUserAccount, useSignOut } from "../../../../../hooks/queries/useAuth.ts"
 
 import { motion } from "motion/react"
 
 const Sidebar = () => {
-    const { data: user } = useUser()
+    const { data: user } = useUserAccount()
     const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut()
     const { pathname } = useLocation()
 

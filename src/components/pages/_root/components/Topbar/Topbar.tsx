@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom"
 import { FaHome, FaCog, FaRegHeart, FaRegPaperPlane, FaCompass, FaUsers, FaRegBookmark, FaPlusSquare } from "react-icons/fa"
-import { useUser, useSignOut } from "../../../../../hooks/queries/useAuth"
+import { useUserAccount, useSignOut } from "../../../../../hooks/queries/useAuth"
 import { motion } from "motion/react"
 
 const Topbar = () => {
-    const { data: user } = useUser()
+    const { data: user } = useUserAccount()
     const { mutate: signOut, isPending } = useSignOut()
     const { pathname } = useLocation()
 
