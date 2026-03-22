@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
-import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare } from "react-icons/fa"
+import { FaHome, FaCompass, FaRegBookmark, FaUsers, FaPlusSquare, FaCog, FaRegHeart, FaRegPaperPlane } from "react-icons/fa"
 import { MdVerified } from "react-icons/md"
 import { type INavLink } from "../../../../../types/index.ts"
 import { useUser, useSignOut } from "../../../../../hooks/queries/useAuth.ts"
@@ -15,6 +15,9 @@ const Sidebar = () => {
         { name: "People", path: "/all-users", icon: <FaUsers /> },
         { name: "Saved", path: "/saved", icon: <FaRegBookmark /> },
         { name: "Create Post", path: "/create-post", icon: <FaPlusSquare /> },
+        { name: "Notifications", path: "/notifications", icon: <FaRegHeart /> },
+        { name: "Messages", path: "/messages", icon: <FaRegPaperPlane /> },
+        { name: "Settings", path: "/settings", icon: <FaCog /> },
     ]
 
     return (

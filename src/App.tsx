@@ -5,6 +5,14 @@ import SignInForm from "./components/pages/_auth/SignInForm"
 import SignUpForm from "./components/pages/_auth/SignUpForm"
 import RootLayout from "./components/pages/_root/RootLayout"
 import Home from "./components/pages/_root/Home"
+import AccountSettings from "./components/pages/_root/Settings/AccountSettings"
+import Explore from "./components/pages/_root/Explore"
+import AllUsers from "./components/pages/_root/AllUsers"
+import Saved from "./components/pages/_root/Saved"
+import CreatePost from "./components/pages/_root/CreatePost"
+import Notifications from "./components/pages/_root/Notifications"
+import Messages from "./components/pages/_root/Messages"
+import Profile from "./components/pages/_root/Profile"
 import VerifyEmail from "./components/pages/_auth/VerifyEmail/VerifyEmail"
 import VerificationPending from "./components/pages/_auth/VerifyEmail/VerificationPending"
 import VerifyLayout from "./components/pages/_auth/VerifyLayout"
@@ -22,6 +30,14 @@ const App = () => {
         {/* private routes */}
         <Route element={<RootLayout />}>
           <Route index element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/all-users" element={<AllUsers />} />
+          <Route path="/saved" element={<Saved />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/settings" element={<AccountSettings />} />
         </Route>
 
         {/* Standalone focused routes */}
