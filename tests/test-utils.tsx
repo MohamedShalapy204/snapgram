@@ -1,6 +1,6 @@
 import { type PropsWithChildren, type ReactElement } from "react"
 import { render as rtlRender, type RenderOptions } from "@testing-library/react"
-import { BrowserRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router-dom"
 import { Provider } from "react-redux"
 import { combineReducers, configureStore } from "@reduxjs/toolkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -46,9 +46,9 @@ function render(
         return (
             <Provider store={store}>
                 <QueryClientProvider client={queryClient}>
-                    <BrowserRouter>
+                    <MemoryRouter>
                         {children}
-                    </BrowserRouter>
+                    </MemoryRouter>
                 </QueryClientProvider>
             </Provider>
         )
@@ -82,9 +82,9 @@ export function renderHook<Result, Props>(
         return (
             <Provider store={store}>
                 <QueryClientProvider client={queryClient}>
-                    <BrowserRouter>
+                    <MemoryRouter>
                         {children}
-                    </BrowserRouter>
+                    </MemoryRouter>
                 </QueryClientProvider>
             </Provider>
         )

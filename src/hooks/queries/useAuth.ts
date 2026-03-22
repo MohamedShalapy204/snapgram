@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Models } from 'appwrite';
 import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
+import type { User } from '../../types';
 
 /**
  * Custom React Query Hook for handling User Sign Up
@@ -10,7 +12,7 @@ import { QUERY_KEYS } from '../../keys/queryKeys';
 export const useSignUp = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useMutation<Models.User<Models.Preferences>, Error, SignupSchema>({
         mutationFn: async (data: SignupSchema) => {
             const newAccount = await createUserAccount(data);
 
@@ -24,7 +26,7 @@ export const useSignUp = () => {
         },
         onSuccess: (newAccount, variables) => {
             // Update the global React Query user cache automatically
-            queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], {
+            queryClient.setQueryData<User>([QUERY_KEYS.GET_CURRENT_USER], {
                 id: newAccount.$id,
                 name: newAccount.name,
                 username: variables.username,
@@ -33,7 +35,7 @@ export const useSignUp = () => {
                 verified: false // New accounts start unverified
             });
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             console.error("useSignUp :: error:", error);
             // Could add toast notification logic here later
         }
@@ -47,7 +49,7 @@ export const useSignUp = () => {
 export const useSignIn = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useMutation<Models.User<Models.Preferences>, Error, SigninSchema>({
         mutationFn: async (data: SigninSchema) => {
             await signInAccount({ email: data.email, password: data.password });
 
@@ -57,7 +59,7 @@ export const useSignIn = () => {
             return currentAccount;
         },
         onSuccess: (currentAccount) => {
-            queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], {
+            queryClient.setQueryData<User>([QUERY_KEYS.GET_CURRENT_USER], {
                 id: currentAccount.$id,
                 name: currentAccount.name,
                 username: currentAccount.name.replace(/\s+/g, '').toLowerCase(), // Temporary mock out until DB service is up
@@ -66,7 +68,7 @@ export const useSignIn = () => {
                 verified: currentAccount.emailVerification
             });
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             console.error("useSignIn :: error:", error);
         }
     });
@@ -78,13 +80,13 @@ export const useSignIn = () => {
 export const useSignOut = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useMutation<void, Error, void>({
         mutationFn: signOutAccount,
         onSuccess: () => {
             // Wipe user off query client cache entirely
             queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], null);
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             console.error("useSignOut :: error:", error);
         }
     });
@@ -95,7 +97,7 @@ export const useSignOut = () => {
  * Acts as the single source of truth for auth status, removing the need for Redux.
  */
 export const useUser = () => {
-    return useQuery({
+    return useQuery<User | null, Error>({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: async () => {
             try {
@@ -126,14 +128,14 @@ export const useUser = () => {
 export const useVerifyEmail = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useMutation<Models.Token, Error, { userId: string; secret: string }>({
         mutationFn: ({ userId, secret }: { userId: string; secret: string }) =>
             updateVerificationStatus(userId, secret),
         onSuccess: () => {
             // Invalidate user data to trigger a re-fetch with new verification status
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             console.error("useVerifyEmail :: error:", error);
         }
     });
@@ -143,13 +145,14 @@ export const useVerifyEmail = () => {
  * Custom React Query Hook for sending verification email
  */
 export const useSendVerificationEmail = () => {
-    return useMutation({
+    return useMutation<Models.Token, Error, string>({
         mutationFn: (url: string) => sendVerificationEmail(url),
         onSuccess: () => {
             console.log("Verification email sent!");
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             console.error("useSendVerificationEmail :: error:", error);
         }
     });
 };
+

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
-import { useSignUp, useSignIn, useUser, useSignOut } from './useAuth';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount } from '../../services/appwrite';
+import { useSignUp, useSignIn, useUser, useSignOut, useVerifyEmail, useSendVerificationEmail } from './useAuth';
+import type { Models } from 'appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
@@ -9,7 +10,9 @@ vi.mock('../../services/appwrite', () => ({
     createUserAccount: vi.fn(),
     signInAccount: vi.fn(),
     getCurrentAccount: vi.fn(),
-    signOutAccount: vi.fn()
+    signOutAccount: vi.fn(),
+    updateVerificationStatus: vi.fn(),
+    sendVerificationEmail: vi.fn()
 }));
 
 describe('useSignUp Hook', () => {
@@ -222,7 +225,7 @@ describe('useUser Hook', () => {
 
     it('should return null and not throw if getCurrentAccount fails', async () => {
         // Arrange
-        vi.mocked(getCurrentAccount as unknown as () => Promise<unknown>).mockRejectedValueOnce(new Error('Missing scope'));
+        vi.mocked(getCurrentAccount).mockRejectedValueOnce(new Error('Missing scope'));
 
         const { result } = renderHook(() => useUser());
 
@@ -242,7 +245,7 @@ describe('useSignOut Hook', () => {
 
     it('should successfully sign out and clear query cache', async () => {
         // Arrange
-        vi.mocked(signOutAccount as unknown as () => Promise<unknown>).mockResolvedValueOnce({});
+        vi.mocked(signOutAccount).mockResolvedValueOnce(undefined);
 
         const { result, queryClient } = renderHook(() => useSignOut());
 
@@ -261,7 +264,7 @@ describe('useSignOut Hook', () => {
     it('should log error if sign out fails', async () => {
         // Arrange
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-        vi.mocked(signOutAccount as unknown as () => Promise<unknown>).mockRejectedValueOnce(new Error('Network error'));
+        vi.mocked(signOutAccount).mockRejectedValueOnce(new Error('Network error'));
 
         const { result } = renderHook(() => useSignOut());
 
@@ -270,5 +273,35 @@ describe('useSignOut Hook', () => {
         expect(consoleSpy).toHaveBeenCalledWith("useSignOut :: error:", expect.any(Error));
 
         consoleSpy.mockRestore();
+    });
+});
+
+describe('useVerifyEmail Hook', () => {
+    it('should successfully update verification and invalidate user query', async () => {
+        // Arrange
+        vi.mocked(updateVerificationStatus).mockResolvedValueOnce({} as Models.Token);
+        const { result, queryClient } = renderHook(() => useVerifyEmail());
+        const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+        // Act
+        await result.current.mutateAsync({ userId: '123', secret: 'secret' });
+
+        // Assert
+        expect(updateVerificationStatus).toHaveBeenCalledWith('123', 'secret');
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
+    });
+});
+
+describe('useSendVerificationEmail Hook', () => {
+    it('should successfully call send service', async () => {
+        // Arrange
+        vi.mocked(sendVerificationEmail).mockResolvedValueOnce({} as Models.Token);
+        const { result } = renderHook(() => useSendVerificationEmail());
+
+        // Act
+        await result.current.mutateAsync('http://localhost/verify');
+
+        // Assert
+        expect(sendVerificationEmail).toHaveBeenCalledWith('http://localhost/verify');
     });
 });
