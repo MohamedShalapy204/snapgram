@@ -1,18 +1,46 @@
-import { useUser } from "../../../../hooks/queries/useAuth"
+import { useForm } from "react-hook-form"
+import { useUser, useUpdateUser } from "../../../../hooks/queries/useAuth"
+import { useEffect, useState } from "react"
+import { MdVerified } from "react-icons/md"
 
 const AccountSettings = () => {
     const { data: user } = useUser()
+    const { mutate: updateUser, isPending: isUpdating } = useUpdateUser()
+    const [successMessage, setSuccessMessage] = useState("")
+
+    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
+        defaultValues: {
+            name: user?.name || ""
+        }
+    })
+
+    useEffect(() => {
+        if (user) {
+            reset({ name: user.name })
+        }
+    }, [user, reset])
+
+    const onSubmit = (data: { name: string }) => {
+        setSuccessMessage("")
+        updateUser(data.name, {
+            onSuccess: () => {
+                setSuccessMessage("Profile updated successfully!")
+                setTimeout(() => setSuccessMessage(""), 5000)
+            }
+        })
+    }
 
     return (
         <div className="flex-1 flex flex-col items-center p-6 md:p-12 bg-base-100">
             <div className="w-full max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <header className="border-b border-base-300 pb-6">
-                    <h1 className="text-4xl font-black tracking-tighter">Account Settings</h1>
-                    <p className="text-base-content/60 font-medium">Manage your profile and account preferences.</p>
+                <header className="border-b border-base-300 pb-6 flex justify-between items-end">
+                    <div>
+                        <h1 className="text-4xl font-black tracking-tighter">Account Settings</h1>
+                        <p className="text-base-content/60 font-medium">Manage your profile and account preferences.</p>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Sidebar/Info Section */}
                     <div className="lg:col-span-1 space-y-6">
                         <div className="p-6 rounded-3xl bg-base-200 border border-base-300 space-y-6 shadow-sm">
                             <div className="flex flex-col items-center text-center space-y-4">
@@ -22,8 +50,11 @@ const AccountSettings = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold truncate max-w-[200px]">{user?.name}</h2>
-                                    <p className="text-sm font-medium text-base-content/50 italic truncate max-w-[200px]">@{user?.username}</p>
+                                    <div className="flex items-center justify-center gap-1">
+                                        <h2 className="text-xl font-bold truncate max-w-[150px]">{user?.name}</h2>
+                                        {user?.verified && <MdVerified className="text-primary" />}
+                                    </div>
+                                    <p className="text-sm font-medium text-base-content/50 italic truncate max-w-[150px]">@{user?.username}</p>
                                 </div>
                             </div>
 
@@ -39,30 +70,52 @@ const AccountSettings = () => {
                         </div>
                     </div>
 
-                    {/* Main Settings Section */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Profile Info Card */}
-                        <section className="space-y-4">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <h3 className="text-lg font-black uppercase tracking-widest text-base-content/40 ml-1">Personal information</h3>
                             <div className="p-8 rounded-3xl bg-base-200/50 border border-base-300 shadow-sm space-y-6">
+                                {successMessage && (
+                                    <div className="alert alert-success rounded-2xl font-bold p-3 animate-in fade-in slide-in-from-top-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>{successMessage}</span>
+                                    </div>
+                                )}
+
                                 <div className="form-control w-full">
                                     <label className="label">
                                         <span className="label-text font-bold">Full Name</span>
                                     </label>
-                                    <input type="text" value={user?.name || ''} readOnly className="input input-bordered rounded-2xl bg-base-100 cursor-not-allowed border-base-300 font-medium" />
+                                    <input
+                                        type="text"
+                                        {...register("name", { required: true })}
+                                        className="input input-bordered rounded-2xl bg-base-100 border-base-300 font-medium focus:ring-2 focus:ring-primary/20 "
+                                    />
                                 </div>
+
                                 <div className="form-control w-full">
                                     <label className="label">
                                         <span className="label-text font-bold">Email Address</span>
                                     </label>
-                                    <input type="email" value={user?.email || ''} readOnly className="input input-bordered rounded-2xl bg-base-100 cursor-not-allowed border-base-300 font-medium" />
+                                    <input
+                                        type="email"
+                                        value={user?.email || ''}
+                                        readOnly
+                                        className="input input-bordered rounded-2xl bg-base-100 cursor-not-allowed border-base-300 font-medium opacity-60"
+                                    />
+                                    <span className="text-[10px] font-bold text-base-content/40 ml-2 italic mt-1 uppercase tracking-widest leading-none">* Email cannot be changed</span>
                                 </div>
-                                <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-primary shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span className="text-xs font-medium leading-relaxed opacity-80">Profile information is currently read-only. We synchronize these details directly from your Appwrite identity.</span>
+
+                                <div className="flex justify-end pt-4 border-t border-base-300/50">
+                                    <button
+                                        type="submit"
+                                        disabled={isUpdating || !isDirty}
+                                        className="btn btn-primary rounded-2xl px-12 font-black shadow-xl shadow-primary/20 active:scale-95 transition-all"
+                                    >
+                                        {isUpdating ? <span className="loading loading-spinner"></span> : "Save Changes"}
+                                    </button>
                                 </div>
                             </div>
-                        </section>
+                        </form>
                     </div>
                 </div>
             </div>

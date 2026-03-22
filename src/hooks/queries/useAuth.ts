@@ -1,9 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { User } from '../../types';
+
+/**
+ * Custom React Query Hook for updating the user's name.
+ */
+export const useUpdateUser = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<Models.User<Models.Preferences>, Error, string>({
+        mutationFn: (name: string) => updateAccountName(name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_CURRENT_USER]
+            });
+        },
+        onError: (error: Error) => {
+            console.error("useUpdateUser :: error:", error);
+        }
+    });
+};
 
 /**
  * Custom React Query Hook for handling User Sign Up

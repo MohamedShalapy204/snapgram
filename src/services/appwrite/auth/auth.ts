@@ -82,3 +82,15 @@ export const updateVerificationStatus = async (userId: string, secret: string) =
     throw error;
   }
 };
+
+/**
+ * Updates the user's name on their account.
+ */
+export const updateAccountName = async (name: string) => {
+  try {
+    return await account.updateName(name);
+  } catch (error) {
+    console.error("AuthService :: updateAccountName error:", error);
+    throw error;
+  }
+};
