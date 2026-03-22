@@ -1,20 +1,21 @@
 import { useEffect } from "react"
 import { useSearchParams, useNavigate, Link } from "react-router-dom"
-import { useVerifyEmail } from "../../../../hooks/queries/useAuth"
+import { useVerifyEmail, useUser } from "../../../../hooks/queries/useAuth"
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
+    const { data: user } = useUser()
     const { mutate: verify, isPending, isSuccess, isError } = useVerifyEmail()
 
     const userId = searchParams.get("userId")
     const secret = searchParams.get("secret")
 
     useEffect(() => {
-        if (userId && secret) {
+        if (userId && secret && !user?.verified) {
             verify({ userId, secret })
         }
-    }, [userId, secret, verify])
+    }, [userId, secret, verify, user?.verified])
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-base-100 p-6 text-center">
@@ -23,7 +24,27 @@ const VerifyEmail = () => {
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-content font-black text-3xl shadow-xl shadow-primary/20 p-2">S</div>
                 </div>
 
-                {isPending && (
+                {user?.verified && (
+                    <div className="space-y-6">
+                        <div className="flex justify-center">
+                            <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h1 className="text-3xl font-black tracking-tighter text-success">Already Verified!</h1>
+                        <p className="text-base-content/70 font-medium leading-relaxed">Good news! Your account is already verified. You can start using Snapgram right away.</p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="btn btn-primary w-full text-lg font-black tracking-wide rounded-2xl shadow-lg shadow-primary/20"
+                        >
+                            Go to Home
+                        </button>
+                    </div>
+                )}
+
+                {isPending && !user?.verified && (
                     <div className="space-y-6">
                         <div className="flex justify-center">
                             <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -33,7 +54,7 @@ const VerifyEmail = () => {
                     </div>
                 )}
 
-                {isSuccess && (
+                {isSuccess && !user?.verified && (
                     <div className="space-y-6">
                         <div className="flex justify-center">
                             <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center animate-bounce">
@@ -53,7 +74,7 @@ const VerifyEmail = () => {
                     </div>
                 )}
 
-                {isError && (
+                {isError && !user?.verified && (
                     <div className="space-y-6">
                         <div className="flex justify-center">
                             <div className="h-20 w-20 rounded-full bg-error/20 flex items-center justify-center">
@@ -73,7 +94,7 @@ const VerifyEmail = () => {
                     </div>
                 )}
 
-                {!userId || !secret && !isPending && !isSuccess && !isError && (
+                {!userId || !secret && !isPending && !isSuccess && !isError && !user?.verified && (
                     <div className="space-y-6">
                         <h1 className="text-3xl font-black tracking-tighter text-error">Invalid Link</h1>
                         <p className="text-base-content/70 font-medium leading-relaxed">This verification link is incomplete. Please check your email and try again.</p>
