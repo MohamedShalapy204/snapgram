@@ -17,7 +17,7 @@ export interface Post {
   imageUrl: string
   location?: string
   tags?: string[]
-  creator: User
+  creator: UserAccount
   likes: string[] // List of user IDs who liked the post
   save: string[] // List of user IDs who saved the post
   $createdAt: string
@@ -36,7 +36,7 @@ export interface INavLink {
   name: string
 }
 
-export interface User {
+export interface UserAccount {
   id: string
   name: string
   username: string
@@ -45,9 +45,24 @@ export interface User {
   verified: boolean
 }
 
+export interface User {
+  $id: string
+  name: string
+  userName: string
+  email: string
+  bio: string
+  imageId: string
+  imageUrl: string
+  posts: string[]
+  liked: string[]
+  save: string[]
+  $createdAt: string
+  $updatedAt: string
+}
+
 export interface AuthState {
   isAuthenticated: boolean
-  user: User | null
+  user: UserAccount | null
 }
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';

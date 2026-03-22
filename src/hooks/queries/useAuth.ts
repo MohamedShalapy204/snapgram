@@ -3,7 +3,7 @@ import type { Models } from 'appwrite';
 import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
-import type { User } from '../../types';
+import type { UserAccount } from '../../types';
 
 /**
  * Custom React Query Hook for updating the user's name.
@@ -45,7 +45,7 @@ export const useSignUp = () => {
         },
         onSuccess: (newAccount, variables) => {
             // Update the global React Query user cache automatically
-            queryClient.setQueryData<User>([QUERY_KEYS.GET_CURRENT_USER], {
+            queryClient.setQueryData<UserAccount>([QUERY_KEYS.GET_CURRENT_USER], {
                 id: newAccount.$id,
                 name: newAccount.name,
                 username: variables.username,
@@ -78,7 +78,7 @@ export const useSignIn = () => {
             return currentAccount;
         },
         onSuccess: (currentAccount) => {
-            queryClient.setQueryData<User>([QUERY_KEYS.GET_CURRENT_USER], {
+            queryClient.setQueryData<UserAccount>([QUERY_KEYS.GET_CURRENT_USER], {
                 id: currentAccount.$id,
                 name: currentAccount.name,
                 username: currentAccount.name.replace(/\s+/g, '').toLowerCase(), // Temporary mock out until DB service is up
@@ -116,7 +116,7 @@ export const useSignOut = () => {
  * Acts as the single source of truth for auth status, removing the need for Redux.
  */
 export const useUser = () => {
-    return useQuery<User | null, Error>({
+    return useQuery<UserAccount | null, Error>({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: async () => {
             try {

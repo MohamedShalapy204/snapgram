@@ -3,7 +3,7 @@ import { render, screen } from "../../../../../tests/test-utils.tsx"
 import AuthLayout from "./AuthLayout.tsx"
 import { useUser } from "../../../../hooks/queries/useAuth"
 import type { UseQueryResult } from "@tanstack/react-query"
-import type { User } from "../../../../types/index.ts"
+import type { UserAccount } from "../../../../types/index.ts"
 
 // Mock the react-router-dom hooks to simplify layout testing
 vi.mock("react-router-dom", async () => {
@@ -31,7 +31,7 @@ describe("AuthLayout", () => {
         vi.mocked(useUser).mockReturnValue({
             data: { id: "1", name: "Test User", username: "test", email: "test@snap.com", avatar: "" },
             isPending: false
-        } as unknown as UseQueryResult<User | null, Error>)
+        } as unknown as UseQueryResult<UserAccount | null, Error>)
 
         render(<AuthLayout />)
 
@@ -46,7 +46,7 @@ describe("AuthLayout", () => {
         vi.mocked(useUser).mockReturnValue({
             data: null,
             isPending: true
-        } as unknown as UseQueryResult<User | null, Error>)
+        } as unknown as UseQueryResult<UserAccount | null, Error>)
 
         render(<AuthLayout />)
 
@@ -61,7 +61,7 @@ describe("AuthLayout", () => {
         vi.mocked(useUser).mockReturnValue({
             data: null,
             isPending: false
-        } as unknown as UseQueryResult<User | null, Error>)
+        } as unknown as UseQueryResult<UserAccount | null, Error>)
 
         render(<AuthLayout />)
 
@@ -78,7 +78,7 @@ describe("AuthLayout", () => {
         vi.mocked(useUser).mockReturnValue({
             data: null,
             isPending: false
-        } as unknown as UseQueryResult<User | null, Error>)
+        } as unknown as UseQueryResult<UserAccount | null, Error>)
 
         render(<AuthLayout />)
 
