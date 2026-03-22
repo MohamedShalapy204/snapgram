@@ -20,7 +20,8 @@ const SignUpForm = () => {
             success("Account created successfully! We've sent a verification email.")
             navigate("/verify-pending")
         } catch (err) {
-            toastError("Registration failed. This email may already be in use.")
+            const errorMessage = err instanceof Error ? err.message : "Registration failed. Please try again.";
+            toastError(errorMessage)
             console.error("SignUpForm :: onSubmit error:", err)
         }
     }

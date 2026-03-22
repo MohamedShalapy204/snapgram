@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, saveUserToDB, getUserByUsername } from '../../services/appwrite';
 import type { SignupSchema, SigninSchema } from '../../utils/validation';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 import type { UserAccount } from '../../types';
@@ -33,6 +33,12 @@ export const useSignUp = () => {
 
     return useMutation<Models.User<Models.Preferences>, Error, SignupSchema>({
         mutationFn: async (data: SignupSchema) => {
+            // Extra layer: ensure unique username before interacting with Auth Service
+            const existingUser = await getUserByUsername(data.username);
+            if (existingUser) {
+                throw new Error("Username already taken. Please choose another one.");
+            }
+
             const newAccount = await createUserAccount(data);
 
             // Sign in immediately after creating account

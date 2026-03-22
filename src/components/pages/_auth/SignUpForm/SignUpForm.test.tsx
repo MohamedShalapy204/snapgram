@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "../../../../../tests/test-ut
 import SignUpForm from "./SignUpForm.tsx"
 
 import { useSignUp } from "../../../../hooks/queries/useAuth"
+import { useToast } from "../../../../hooks/useToast"
 
 vi.mock("../../../../hooks/queries/useAuth", () => ({
     useSignUp: vi.fn(() => ({
@@ -13,6 +14,7 @@ vi.mock("../../../../hooks/queries/useAuth", () => ({
 
 vi.mock("../../../../hooks/useToast", () => ({
     useToast: vi.fn(() => ({
+        toast: vi.fn(),
         success: vi.fn(),
         error: vi.fn(),
         info: vi.fn(),
@@ -128,6 +130,44 @@ describe("SignUpForm", () => {
                 email: "alice@snap.com",
                 password: "secure-password",
             })
+        })
+    })
+
+    // Negative Testing: Server/hook validation error
+    it("should display the dynamic backend error via toast if signup fails", async () => {
+        // Arrange
+        const mockToastError = vi.fn()
+        vi.mocked(useToast).mockReturnValue({
+            toast: vi.fn(),
+            success: vi.fn(),
+            error: mockToastError,
+            info: vi.fn(),
+            warning: vi.fn()
+        } as unknown as ReturnType<typeof useToast>)
+
+        const mockMutateAsync = vi.fn().mockRejectedValueOnce(new Error("Username already taken. Please choose another one."))
+        vi.mocked(useSignUp).mockReturnValue({
+            mutateAsync: mockMutateAsync,
+            isPending: false
+        } as unknown as ReturnType<typeof useSignUp>)
+
+        renderSignUpForm()
+
+        const nameInput = screen.getByPlaceholderText(/John Doe/i)
+        const usernameInput = screen.getByPlaceholderText(/johndoe/i)
+        const emailInput = screen.getByPlaceholderText(/m@example.com/i)
+        const passwordInput = screen.getByPlaceholderText(/••••••••/i)
+
+        // Act
+        fireEvent.change(nameInput, { target: { value: "Alice Jones" } })
+        fireEvent.change(usernameInput, { target: { value: "taken" } })
+        fireEvent.change(emailInput, { target: { value: "alice@snap.com" } })
+        fireEvent.change(passwordInput, { target: { value: "secure-password" } })
+        fireEvent.click(screen.getByRole("button", { name: /Sign Up/i }))
+
+        // Assert
+        await waitFor(() => {
+            expect(mockToastError).toHaveBeenCalledWith("Username already taken. Please choose another one.")
         })
     })
 

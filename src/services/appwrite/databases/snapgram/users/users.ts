@@ -117,3 +117,22 @@ export const searchUsers = async (searchTerm: string) => {
         throw error;
     }
 };
+
+/**
+ * Retrieves a user document by exact username match (for uniqueness validation).
+ */
+export const getUserByUsername = async (username: string) => {
+    try {
+        const users = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.usersCollectionId,
+            [Query.equal("username", username)]
+        );
+
+        if (users.total > 0) return users.documents[0] as unknown as User;
+        return null;
+    } catch (error) {
+        console.error("UserService :: getUserByUsername error:", error);
+        throw error;
+    }
+};

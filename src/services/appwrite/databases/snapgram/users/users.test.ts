@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { databases } from '../../../config';
-import { saveUserToDB, getUserById, updateUser, getUsers, searchUsers } from './users';
+import { saveUserToDB, getUserById, updateUser, getUsers, searchUsers, getUserByUsername } from './users';
 import { Query, type Models } from 'appwrite';
 
 vi.mock('../../../config', () => ({
@@ -109,6 +109,45 @@ describe('UserService', () => {
                 'test-users',
                 [Query.or([Query.search("name", "test"), Query.search("username", "test")])]
             );
+        });
+    });
+    describe('getUserByUsername', () => {
+        it('should call listDocuments with equal query returning user document', async () => {
+            const mockUser = { $id: 'user_bob', username: 'bob' };
+            vi.mocked(databases.listDocuments).mockResolvedValueOnce({
+                documents: [mockUser],
+                total: 1
+            } as unknown as Models.DocumentList<Models.Document>);
+
+            const result = await getUserByUsername('bob');
+
+            expect(databases.listDocuments).toHaveBeenCalledWith(
+                'test-db',
+                'test-users',
+                [Query.equal("username", "bob")]
+            );
+            expect(result).toEqual(mockUser);
+        });
+
+        it('should return null if no user matches', async () => {
+            vi.mocked(databases.listDocuments).mockResolvedValueOnce({
+                documents: [],
+                total: 0
+            } as unknown as Models.DocumentList<Models.Document>);
+
+            const result = await getUserByUsername('nonexistent');
+            expect(result).toBeNull();
+        });
+
+        it('should log and throw error on failure', async () => {
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            const mockError = new Error('DB Error');
+            vi.mocked(databases.listDocuments).mockRejectedValueOnce(mockError);
+
+            await expect(getUserByUsername('bob')).rejects.toThrow('DB Error');
+            expect(consoleSpy).toHaveBeenCalledWith("UserService :: getUserByUsername error:", mockError);
+
+            consoleSpy.mockRestore();
         });
     });
 });
