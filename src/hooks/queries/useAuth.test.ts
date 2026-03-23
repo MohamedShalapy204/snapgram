@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '../../../tests/test-utils';
 import { useSignUp, useSignIn, useUserAccount, useSignOut, useVerifyEmail, useSendVerificationEmail, useUpdateUserAccount } from './useAuth';
 import type { Models } from 'appwrite';
-import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail, getUserById, updateAccountPrefs } from '../../services/appwrite';
+import { createUserAccount, signInAccount, getCurrentAccount, signOutAccount, updateVerificationStatus, sendVerificationEmail, updateAccountName, getUserByUsername, getUserByEmail, getUserById } from '../../services/appwrite';
 import { QUERY_KEYS } from '../../keys/queryKeys';
 
 // Mock the internal appwrite logic so we only test the hook workflow
