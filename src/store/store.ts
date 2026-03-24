@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import toastReducer from "./slices/toastSlice"
+import commentReducer from "./slices/commentSlice"
 
 export const store = configureStore({
   reducer: {
-    toast: toastReducer
+    toast: toastReducer,
+    comment: commentReducer
   },
 })
 

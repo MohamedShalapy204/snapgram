@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Topbar from "../components/Topbar"
+import CommentsSideBar from "../../../shared/CommentsSideBar"
 import { useUserAccount, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
 import { MdInfoOutline } from "react-icons/md"
 
@@ -91,6 +92,7 @@ const RootLayout = () => {
         <div className="flex w-full flex-col md:flex-row min-h-screen bg-base-200 selection:bg-primary selection:text-primary-content">
             <Topbar />
             <Sidebar />
+            <CommentsSideBar />
 
             <section className="flex flex-col flex-1 h-full py-10 px-4 md:px-10 items-center overflow-y-auto custom-scrollbar">
                 {!userAccount.verified && (

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useGetUserById } from "../../hooks/queries/useUsers";
+import { toggleComments } from "../../store/slices/commentSlice";
 import { type Post } from "../../types";
 
 /**
@@ -7,6 +9,8 @@ import { type Post } from "../../types";
  * Handles fetching the creator's full details (since post.creator is often just an ID string).
  */
 const PostCard = ({ post }: { post: Post }) => {
+    const dispatch = useDispatch();
+
     // Fetch the creator's full document (data is cached by React Query)
     const { data: creatorUser, isLoading: isCreatorLoading } = useGetUserById(post.creator || "");
 
@@ -56,7 +60,10 @@ const PostCard = ({ post }: { post: Post }) => {
                     <button className="btn btn-ghost btn-sm gap-2 hover:bg-primary/10 hover:text-primary rounded-full px-5 transition-all active:scale-[0.9] font-bold">
                         <span className="text-lg">❤️</span> {post.likes?.length || 0}
                     </button>
-                    <button className="btn btn-ghost btn-sm gap-2 hover:bg-primary/10 hover:text-primary rounded-full px-5 transition-all active:scale-[0.9] font-bold">
+                    <button
+                        onClick={() => dispatch(toggleComments(post.$id))}
+                        className="btn btn-ghost btn-sm gap-2 hover:bg-primary/10 hover:text-primary rounded-full px-5 transition-all active:scale-[0.9] font-bold"
+                    >
                         <span className="text-lg">💬</span> 0
                     </button>
                     <button className="btn btn-ghost btn-sm gap-2 hover:bg-primary/10 hover:text-primary ml-auto rounded-full px-5 transition-all active:scale-[0.9] font-bold">
