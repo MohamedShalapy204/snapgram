@@ -108,7 +108,7 @@ export const searchUsers = async (searchTerm: string) => {
         const users = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.usersCollectionId,
-            [Query.or([Query.search("name", searchTerm), Query.search("username", searchTerm)])]
+            [Query.or([Query.contains("name", searchTerm), Query.contains("username", searchTerm)])]
         );
 
         return users;

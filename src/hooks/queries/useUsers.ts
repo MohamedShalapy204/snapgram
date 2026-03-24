@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUserById, updateUser } from "../../services/appwrite/databases/snapgram/users/users";
+import { getUserById, updateUser, getUsers, searchUsers } from "../../services/appwrite/databases/snapgram/users/users";
 import { uploadFile, deleteFile, getFilePreview } from "../../services/appwrite/storage/storage";
 import { QUERY_KEYS } from "../../keys/queryKeys";
 
@@ -11,6 +11,27 @@ export const useGetUserById = (userId: string) => {
         queryKey: [QUERY_KEYS.GET_USER_BY_ID, userId],
         queryFn: () => getUserById(userId),
         enabled: !!userId,
+    });
+};
+
+/**
+ * Hook to fetch a list of users.
+ */
+export const useGetUsers = (limit?: number) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_USERS],
+        queryFn: () => getUsers(limit),
+    });
+};
+
+/**
+ * Hook to search for users.
+ */
+export const useSearchUsers = (searchTerm: string) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_USERS, searchTerm],
+        queryFn: () => searchUsers(searchTerm),
+        enabled: !!searchTerm,
     });
 };
 

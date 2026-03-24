@@ -72,3 +72,27 @@ export const getRecentPosts = async () => {
         throw error;
     }
 };
+
+/**
+ * Fetches posts for a specific user.
+ */
+export const getUserPosts = async (userId: string, order: "asc" | "desc" = "desc") => {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postsCollectionId,
+            [
+                Query.equal("creator", userId),
+                order === "desc" ? Query.orderDesc("$createdAt") : Query.orderAsc("$createdAt"),
+                Query.limit(50)
+            ]
+        );
+
+        if (!posts) throw new Error("Failed to fetch user posts");
+
+        return posts;
+    } catch (error) {
+        console.error("PostService :: getUserPosts error:", error);
+        throw error;
+    }
+};
