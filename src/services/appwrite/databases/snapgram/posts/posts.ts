@@ -36,6 +36,8 @@ export const createPost = async (post: NewPost, userId: string) => {
                 location: post.location,
                 tags: tags,
                 imageId: uploadedFile.$id,
+                likes: [],
+                save: [],
             }
         );
 
