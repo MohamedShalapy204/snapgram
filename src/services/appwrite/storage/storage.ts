@@ -25,16 +25,13 @@ export const uploadFile = async (file: File) => {
 
 /**
  * Returns the public URL for an uploaded file.
+ * Uses getFileView instead of getFilePreview to avoid 'Image transformations blocked' errors on free plans.
  */
 export const getFilePreview = (fileId: string) => {
     try {
-        const fileUrl = storage.getFilePreview(
+        const fileUrl = storage.getFileView(
             appwriteConfig.storageId,
-            fileId,
-            2000,
-            2000,
-            ImageGravity.Top,
-            100
+            fileId
         );
 
         return fileUrl.toString();

@@ -68,10 +68,10 @@ export const updateUser = async (user: {
             appwriteConfig.usersCollectionId,
             user.userId,
             {
-                ...(user.name && { name: user.name }),
-                ...(user.bio && { bio: user.bio }),
-                ...(user.imageUrl && { imageUrl: user.imageUrl }),
-                ...(user.imageId && { imageId: user.imageId }),
+                ...(user.name !== undefined && { name: user.name }),
+                ...(user.bio !== undefined && { bio: user.bio }),
+                ...(user.imageUrl !== undefined && { imageUrl: user.imageUrl }),
+                ...(user.imageId !== undefined && { imageId: user.imageId }),
             }
         );
 
