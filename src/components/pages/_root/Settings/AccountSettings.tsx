@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import { useUserAccount, useUpdatePassword, useUpdateUserAccount, useUpdateUserPrefs } from "../../../../hooks/queries/useAuth"
 import { useGetUserById, useUpdateUserDB } from "../../../../hooks/queries/useUsers"
 import { useEffect, useState } from "react"
-import { MdVerified, MdVisibility, MdVisibilityOff } from "react-icons/md"
+import { RiVerifiedBadgeFill, RiEyeLine, RiEyeOffLine, RiUser3Line, RiShieldKeyholeLine, RiSave3Line, RiInformationLine } from "react-icons/ri"
 import { useToast } from "../../../../hooks/useToast"
 import FileUploader from "../../../shared/FileUploader"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,6 +11,10 @@ import { useQueryClient } from "@tanstack/react-query"
 import { QUERY_KEYS } from "../../../../keys/queryKeys"
 import type { UserAccount } from "../../../../types"
 
+/**
+ * AccountSettings - Premium cinematic settings dashboard.
+ * Following "The Cinematic Aperture" design strategy.
+ */
 const AccountSettings = () => {
     const queryClient = useQueryClient()
     const { data: userAccount } = useUserAccount()
@@ -60,7 +64,6 @@ const AccountSettings = () => {
     const onSubmit = (data: { name: string; bio: string; file: File[] }) => {
         if (!user) return;
 
-        // Ensure Auth Account name stays in sync with DB profile name
         if (data.name !== user.name) {
             updateUserAccount(data.name);
         }
@@ -78,12 +81,10 @@ const AccountSettings = () => {
             onSuccess: (updatedUser) => {
                 success("Profile updated successfully!")
 
-                // Mirror the new avatar URL in Appwrite Account Preferences for server-side persistence
                 if (updatedUser?.imageUrl) {
                     updatePrefs({ avatar: updatedUser.imageUrl })
                 }
 
-                // Manually update the current user cache for immediate effect across components (Sidebar, Topbar)
                 if (updatedUser) {
                     queryClient.setQueryData([QUERY_KEYS.GET_CURRENT_USER], (old: UserAccount | null) => {
                         if (!old) return old;
@@ -117,160 +118,179 @@ const AccountSettings = () => {
 
     if (isLoadingUser) {
         return (
-            <div className="flex h-full w-full items-center justify-center p-20">
+            <div className="flex h-full w-full items-center justify-center py-40">
                 <span className="loading loading-spinner loading-lg text-primary"></span>
             </div>
         )
     }
 
     return (
-        <div className="flex-1 flex flex-col items-center p-6 md:p-12 bg-base-100">
-            <div className="w-full max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <header className="border-b border-base-300 pb-6 flex justify-between items-end">
-                    <div>
-                        <h1 className="text-4xl font-black tracking-tighter">Account Settings</h1>
-                        <p className="text-base-content/60 font-medium">Manage your profile and account preferences.</p>
+        <div className="flex flex-col flex-1 py-8 md:py-12 animate-in fade-in duration-1000">
+            <div className="max-w-5xl mx-auto w-full px-4 sm:px-6">
+
+                {/* Dashboard Header */}
+                <header className="mb-16 border-b border-white/5 pb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="space-y-4">
+                        <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Settings <span className="text-primary italic">Aperture</span></h1>
+                        <p className="text-on-surface-variant font-medium italic opacity-80">Compose your cinematic presence.</p>
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    <div className="lg:col-span-1 space-y-6">
-                        <div className="p-6 rounded-3xl bg-base-200 border border-base-300 space-y-6 shadow-sm sticky top-24">
-                            <div className="flex flex-col items-center text-center space-y-4">
-                                <FileUploader
-                                    fieldChange={(files) => setValue("file", files, { shouldDirty: true })}
-                                    mediaUrl={user?.imageUrl || ""}
-                                />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+
+                    {/* Sidebar Profile Card */}
+                    <div className="lg:col-span-4 space-y-8">
+                        <div className="glass-card p-8 rounded-[2.5rem] border border-white/5 text-center space-y-8 shadow-3xl sticky top-28 transition-all hover:bg-surface-bright/20">
+                            <div className="flex flex-col items-center space-y-6">
+                                <div className="p-1 rounded-full sunset-gradient shadow-2xl transition-transform hover:scale-105 duration-700">
+                                    <FileUploader
+                                        type="profile"
+                                        fieldChange={(files) => setValue("file", files, { shouldDirty: true })}
+                                        mediaUrl={user?.imageUrl || ""}
+                                    />
+                                </div>
                                 <div>
-                                    <div className="flex items-center justify-center gap-1">
-                                        <h2 className="text-xl font-bold truncate max-w-[150px]">{user?.name}</h2>
-                                        {userAccount?.verified && <MdVerified className="text-primary" />}
+                                    <div className="flex items-center justify-center gap-2 mb-1">
+                                        <h2 className="font-headline text-2xl font-black text-on-surface tracking-tight">{user?.name}</h2>
+                                        {userAccount?.verified && <RiVerifiedBadgeFill className="text-primary text-xl" />}
                                     </div>
-                                    <p className="text-sm font-medium text-base-content/50 italic truncate max-w-[150px]">@{user?.username}</p>
+                                    <p className="text-on-surface-variant text-[11px] font-bold uppercase tracking-[0.2em] opacity-50 italic">@{user?.username}</p>
                                 </div>
                             </div>
 
-                            <div className="stats stats-vertical w-full bg-base-100/50 rounded-2xl border border-base-300/50">
-                                <div className="stat">
-                                    <div className="stat-title text-[10px] uppercase font-black tracking-widest opacity-50">Status</div>
-                                    <div className={`stat-value text-sm font-bold flex items-center gap-2 ${userAccount?.verified ? 'text-success' : 'text-warning'}`}>
-                                        <div className={`h-2 w-2 rounded-full ${userAccount?.verified ? 'bg-success' : 'bg-warning animate-pulse'}`}></div>
-                                        {userAccount?.verified ? 'Verified' : 'Pending Verification'}
-                                    </div>
+                            <div className="p-5 bg-surface-container/60 rounded-3xl border border-white/5 space-y-1.5 shadow-inner">
+                                <p className="text-[10px] font-extrabold uppercase tracking-widest text-on-surface-variant opacity-40">Trust Certificate</p>
+                                <div className={`flex items-center justify-center gap-3 font-black text-xs uppercase tracking-widest ${userAccount?.verified ? 'text-primary' : 'text-primary-dim animate-pulse'}`}>
+                                    <div className={`h-2.5 w-2.5 rounded-full ${userAccount?.verified ? 'bg-primary' : 'bg-primary-dim animate-pulse shadow-[0_0_10px_rgba(255,121,129,0.5)]'}`}></div>
+                                    {userAccount?.verified ? 'Verified Active' : 'Verification In-Lens'}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="lg:col-span-2 space-y-8">
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                            <h3 className="text-lg font-black uppercase tracking-widest text-base-content/40 ml-1">Personal information</h3>
-                            <div className="p-8 rounded-3xl bg-base-200/50 border border-base-300 shadow-sm space-y-6">
+                    {/* Main Settings Body */}
+                    <div className="lg:col-span-8 space-y-12">
 
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold">Full Name</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        {...register("name", { required: true })}
-                                        className="input input-bordered rounded-2xl bg-base-100 border-base-300 font-medium focus:ring-2 focus:ring-primary/20 "
-                                    />
+                        {/* Personal Info Section */}
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in slide-in-from-right-8 duration-700 delay-150">
+                            <div className="flex items-center gap-4 text-on-surface-variant px-2">
+                                <RiUser3Line className="text-xl text-primary" />
+                                <h3 className="text-sm font-black uppercase tracking-[0.25em]">Personal Profile</h3>
+                            </div>
+
+                            <div className="glass-card p-8 md:p-10 rounded-[2.5rem] border border-white/5 space-y-8 shadow-2xl shadow-black/40">
+                                <div className="space-y-6">
+                                    <div className="form-control w-full space-y-2.5">
+                                        <label className="text-[10px] uppercase font-black tracking-widest text-on-surface-variant ml-2 opacity-60">Full Name</label>
+                                        <input
+                                            type="text"
+                                            {...register("name", { required: true })}
+                                            className="w-full bg-surface-container border-none rounded-2xl py-4.5 px-6 text-sm font-medium text-on-surface focus:ring-1 focus:ring-primary/50 shadow-inner"
+                                            placeholder="Enter your artistic name"
+                                        />
+                                    </div>
+
+                                    <div className="form-control w-full space-y-2.5">
+                                        <label className="text-[10px] uppercase font-black tracking-widest text-on-surface-variant ml-2 opacity-60">Creative Bio</label>
+                                        <textarea
+                                            {...register("bio")}
+                                            className="w-full bg-surface-container border-none rounded-2xl py-4.5 px-6 text-sm font-medium text-on-surface h-36 resize-none focus:ring-1 focus:ring-primary/50 shadow-inner"
+                                            placeholder="Tell your story through words..."
+                                        />
+                                    </div>
+
+                                    <div className="form-control w-full space-y-2.5 opacity-70">
+                                        <div className="flex justify-between items-center px-2">
+                                            <label className="text-[10px] uppercase font-black tracking-widest text-on-surface-variant">Email (Permanent)</label>
+                                            <RiInformationLine className="text-sm cursor-help" title="Email is linked to permanent record" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            value={user?.email || ''}
+                                            readOnly
+                                            className="w-full bg-surface-container/40 border-none rounded-2xl py-4.5 px-6 text-sm font-medium text-on-surface-variant cursor-not-allowed italic"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold">Bio</span>
-                                    </label>
-                                    <textarea
-                                        {...register("bio")}
-                                        className="textarea textarea-bordered rounded-2xl bg-base-100 border-base-300 font-medium h-32 resize-none focus:ring-2 focus:ring-primary/20 "
-                                        placeholder="Tell us about yourself..."
-                                    />
-                                </div>
-
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold">Email Address</span>
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={user?.email || ''}
-                                        readOnly
-                                        className="input input-bordered rounded-2xl bg-base-100 cursor-not-allowed border-base-300 font-medium opacity-60"
-                                    />
-                                    <span className="text-[10px] font-bold text-base-content/40 ml-2 italic mt-1 uppercase tracking-widest leading-none">* Email cannot be changed</span>
-                                </div>
-
-                                <div className="flex justify-end pt-4 border-t border-base-300/50">
+                                <div className="flex justify-end pt-6 border-t border-white/5">
                                     <button
                                         type="submit"
                                         disabled={isUpdating || !isDirty}
-                                        className="btn btn-primary rounded-2xl px-12 font-black shadow-xl shadow-primary/20 active:scale-95 transition-all"
+                                        className="electric-gradient-btn px-12 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-40 disabled:grayscale"
                                     >
-                                        {isUpdating ? <span className="loading loading-spinner"></span> : "Save Changes"}
+                                        {isUpdating ? <span className="loading loading-spinner loading-xs"></span> : (
+                                            <>
+                                                <RiSave3Line className="text-lg" />
+                                                Save Snapshot
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>
                         </form>
 
                         {/* Security Section (Change Password) */}
-                        <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4 mt-8">
-                            <h3 className="text-lg font-black uppercase tracking-widest text-base-content/40 ml-1">Security</h3>
-                            <div className="p-8 rounded-3xl bg-base-200/50 border border-base-300 shadow-sm space-y-6">
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold">Current Password</span>
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            placeholder="••••••••"
-                                            {...registerPassword("password")}
-                                            className={`input input-bordered rounded-2xl bg-base-100 border-base-300 font-medium focus:ring-2 focus:ring-primary/20 w-full pr-12 ${passwordErrors.password ? "input-error" : ""}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-base-300 rounded-lg transition-colors text-base-content/40"
-                                        >
-                                            {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
-                                        </button>
+                        <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-8 animate-in slide-in-from-right-8 duration-700 delay-300">
+                            <div className="flex items-center gap-4 text-on-surface-variant px-2">
+                                <RiShieldKeyholeLine className="text-xl text-primary" />
+                                <h3 className="text-sm font-black uppercase tracking-[0.25em]">Vault Security</h3>
+                            </div>
+
+                            <div className="glass-card p-8 md:p-10 rounded-[2.5rem] border border-white/5 space-y-8 shadow-2xl shadow-black/40">
+                                <div className="space-y-6">
+                                    <div className="form-control w-full space-y-2.5">
+                                        <label className="text-[10px] uppercase font-black tracking-widest text-on-surface-variant ml-2 opacity-60">Current Security Key</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="••••••••"
+                                                {...registerPassword("password")}
+                                                className={`w-full bg-surface-container border-none rounded-2xl py-4.5 px-6 text-sm font-medium text-on-surface focus:ring-1 focus:ring-primary/50 shadow-inner pr-14 ${passwordErrors.password ? "ring-1 ring-error/50" : ""}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 hover:bg-white/5 rounded-xl transition-colors text-on-surface-variant text-xl"
+                                            >
+                                                {showPassword ? <RiEyeOffLine /> : <RiEyeLine />}
+                                            </button>
+                                        </div>
+                                        {passwordErrors.password && (
+                                            <span className="text-[10px] text-error font-bold italic tracking-wide ml-2">{passwordErrors.password.message}</span>
+                                        )}
                                     </div>
-                                    {passwordErrors.password && (
-                                        <span className="text-xs text-error mt-1 ml-1 font-bold italic">{passwordErrors.password.message}</span>
-                                    )}
-                                </div>
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold">New Password</span>
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showNewPassword ? "text" : "password"}
-                                            placeholder="••••••••"
-                                            {...registerPassword("newPassword")}
-                                            className={`input input-bordered rounded-2xl bg-base-100 border-base-300 font-medium focus:ring-2 focus:ring-primary/20 w-full pr-12 ${passwordErrors.newPassword ? "input-error" : ""}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-base-300 rounded-lg transition-colors text-base-content/40"
-                                        >
-                                            {showNewPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
-                                        </button>
+
+                                    <div className="form-control w-full space-y-2.5">
+                                        <label className="text-[10px] uppercase font-black tracking-widest text-on-surface-variant ml-2 opacity-60">New Security Key</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showNewPassword ? "text" : "password"}
+                                                placeholder="••••••••"
+                                                {...registerPassword("newPassword")}
+                                                className={`w-full bg-surface-container border-none rounded-2xl py-4.5 px-6 text-sm font-medium text-on-surface focus:ring-1 focus:ring-primary/50 shadow-inner pr-14 ${passwordErrors.newPassword ? "ring-1 ring-error/50" : ""}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 hover:bg-white/5 rounded-xl transition-colors text-on-surface-variant text-xl"
+                                            >
+                                                {showNewPassword ? <RiEyeOffLine /> : <RiEyeLine />}
+                                            </button>
+                                        </div>
+                                        {passwordErrors.newPassword && (
+                                            <span className="text-[10px] text-error font-bold italic tracking-wide ml-2">{passwordErrors.newPassword.message}</span>
+                                        )}
                                     </div>
-                                    {passwordErrors.newPassword && (
-                                        <span className="text-xs text-error mt-1 ml-1 font-bold italic">{passwordErrors.newPassword.message}</span>
-                                    )}
                                 </div>
-                                <div className="flex justify-end pt-4 border-t border-base-300/50">
+
+                                <div className="flex justify-end pt-6 border-t border-white/5">
                                     <button
                                         type="submit"
                                         disabled={isUpdatingPassword || !isPasswordDirty}
-                                        className="btn btn-outline btn-error rounded-2xl px-12 font-black hover:scale-[1.02] active:scale-95 transition-all"
+                                        className="px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/10 text-on-surface-variant hover:text-white hover:bg-white/5 hover:border-white/20 active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
                                     >
-                                        {isUpdatingPassword ? <span className="loading loading-spinner"></span> : "Update Password"}
+                                        {isUpdatingPassword ? <span className="loading loading-spinner loading-xs"></span> : "Update Secret Key"}
                                     </button>
                                 </div>
                             </div>

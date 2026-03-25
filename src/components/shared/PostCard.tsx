@@ -1,96 +1,191 @@
+import { useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { useGetUserById } from "../../hooks/queries/useUsers"
 import { toggleComments } from "../../store/slices/commentSlice"
 import { type Post } from "../../types"
-import { RiHeartLine, RiChat3Line, RiBookmarkLine, RiMoreLine } from "react-icons/ri"
+import { RiHeartLine, RiChat3Line, RiBookmarkLine, RiMoreLine, RiCloseLine, RiZoomInLine } from "react-icons/ri"
 
 /**
  * PostCard - Renders an individual post with a cinematic, atmospheric style.
  * Uses 4/5 aspect ratio, glassmorphic overlays, and React Icons.
+ * Clicking the image opens a full-screen lightbox with Escape-to-close support.
  */
 const PostCard = ({ post }: { post: Post }) => {
     const dispatch = useDispatch()
     const { data: creatorUser, isLoading: isCreatorLoading } = useGetUserById(post.creator || "")
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+
+    const openLightbox = () => setIsLightboxOpen(true)
+    const closeLightbox = useCallback(() => setIsLightboxOpen(false), [])
+
+    // Close lightbox on Escape key
+    useEffect(() => {
+        if (!isLightboxOpen) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") closeLightbox()
+        }
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [isLightboxOpen, closeLightbox])
+
+    // Prevent body scroll when lightbox is open
+    useEffect(() => {
+        document.body.style.overflow = isLightboxOpen ? "hidden" : ""
+        return () => { document.body.style.overflow = "" }
+    }, [isLightboxOpen])
 
     return (
-        <article className="relative group animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            {/* Post Header */}
-            <div className="flex items-center justify-between mb-4 px-1">
-                <Link to={`/profile/${post.creator}`} className="flex items-center space-x-3 group/user">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg transition-transform group-hover/user:scale-110 duration-500">
-                        {isCreatorLoading ? (
-                            <div className="skeleton w-full h-full bg-surface-container" />
-                        ) : (
-                            <img
-                                src={creatorUser?.imageUrl || "/assets/avatar-placeholder.png"}
-                                alt={creatorUser?.name || "User"}
-                                className="w-full h-full object-cover"
-                            />
-                        )}
+        <>
+            <article className="relative group animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                {/* Post Header */}
+                <div className="flex items-center justify-between mb-4 px-1">
+                    <Link to={`/profile/${post.creator}`} className="flex items-center space-x-3 group/user">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg transition-transform group-hover/user:scale-110 duration-500">
+                            {isCreatorLoading ? (
+                                <div className="skeleton w-full h-full bg-surface-container" />
+                            ) : (
+                                <img
+                                    src={creatorUser?.imageUrl || "/assets/avatar-placeholder.png"}
+                                    alt={creatorUser?.name || "User"}
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="font-headline font-bold text-sm leading-none text-on-surface group-hover/user:text-primary transition-colors">
+                                {isCreatorLoading ? "..." : (creatorUser?.username || creatorUser?.name || "Unknown")}
+                            </h3>
+                            <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.15em] mt-1.5 opacity-60">
+                                {post.location || "Earth"}
+                            </p>
+                        </div>
+                    </Link>
+                    <button className="text-on-surface-variant hover:text-on-surface transition-colors active:scale-95 text-xl">
+                        <RiMoreLine />
+                    </button>
+                </div>
+
+                {/* Post Media Container */}
+                <div className="relative aspect-4/5 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] bg-surface-container group/media ring-1 ring-white/5">
+                    {/* Clickable image — opens lightbox */}
+                    <button
+                        id={`post-image-${post.$id}`}
+                        aria-label="View image fullscreen"
+                        onClick={openLightbox}
+                        className="absolute inset-0 w-full h-full cursor-zoom-in"
+                    >
+                        <img
+                            src={post.imageUrl}
+                            alt="Atmospheric capture"
+                            className="w-full h-full object-cover transition-transform duration-2000 ease-out group-hover:scale-110 brightness-[0.85] group-hover:brightness-105"
+                        />
+                    </button>
+
+                    {/* Zoom hint icon */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <div className="p-2 rounded-xl glass-panel border border-white/10 text-white text-lg">
+                            <RiZoomInLine />
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-headline font-bold text-sm leading-none text-on-surface group-hover/user:text-primary transition-colors">
-                            {isCreatorLoading ? "..." : (creatorUser?.username || creatorUser?.name || "Unknown")}
-                        </h3>
-                        <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.15em] mt-1.5 opacity-60">
-                            {post.location || "Earth"}
-                        </p>
-                    </div>
-                </Link>
-                <button className="text-on-surface-variant hover:text-on-surface transition-colors active:scale-95 text-xl">
-                    <RiMoreLine />
-                </button>
-            </div>
 
-            {/* Post Media Container */}
-            <div className="relative aspect-4/5 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] bg-surface-container group/media ring-1 ring-white/5">
-                <img
-                    src={post.imageUrl}
-                    alt="Atmospheric capture"
-                    className="w-full h-full object-cover transition-transform duration-2000 ease-out group-hover:scale-110 brightness-[0.85] group-hover:brightness-105"
-                />
+                    {/* Visual Enhancements */}
+                    <div className="absolute inset-0 vignette-overlay pointer-events-none opacity-60" />
 
-                {/* Visual Enhancements */}
-                <div className="absolute inset-0 vignette-overlay pointer-events-none opacity-60"></div>
-
-                {/* Glass Overlays for Actions */}
-                <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
-                    <div className="flex space-x-3">
+                    {/* Glass Overlays for Actions */}
+                    <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                        <div className="flex space-x-3">
+                            <button className="w-11 h-11 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-all hover:bg-white/20 text-white text-xl shadow-inner">
+                                <RiHeartLine />
+                            </button>
+                            <button
+                                onClick={() => dispatch(toggleComments({ postId: post.$id }))}
+                                className="w-11 h-11 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-all hover:bg-white/20 text-white text-xl shadow-inner"
+                            >
+                                <RiChat3Line />
+                            </button>
+                        </div>
                         <button className="w-11 h-11 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-all hover:bg-white/20 text-white text-xl shadow-inner">
-                            <RiHeartLine />
-                        </button>
-                        <button
-                            onClick={() => dispatch(toggleComments(post.$id))}
-                            className="w-11 h-11 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-all hover:bg-white/20 text-white text-xl shadow-inner"
-                        >
-                            <RiChat3Line />
+                            <RiBookmarkLine />
                         </button>
                     </div>
-                    <button className="w-11 h-11 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-all hover:bg-white/20 text-white text-xl shadow-inner">
-                        <RiBookmarkLine />
+                </div>
+
+                {/* Post Content */}
+                <div className="mt-5 space-y-2.5 px-1">
+                    <div className="flex items-start gap-2 text-sm leading-relaxed text-on-surface/90">
+                        <span className="font-bold text-on-surface">{isCreatorLoading ? "..." : (creatorUser?.username || "user")}</span>
+                        <p className="font-body opacity-80">{post.caption}</p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
+                            {new Date(post.$createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </p>
+                        <span className="h-1 w-1 rounded-full bg-on-surface-variant/20" />
+                        <button
+                            onClick={() => dispatch(toggleComments({ postId: post.$id }))}
+                            className="text-[10px] text-primary font-bold uppercase tracking-widest hover:text-on-surface transition-colors"
+                        >
+                            View all comments
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            {/* Lightbox */}
+            {isLightboxOpen && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Image fullscreen view"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center animate-in fade-in duration-300"
+                    onClick={closeLightbox}
+                >
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
+
+                    {/* Close Button */}
+                    <button
+                        id={`lightbox-close-${post.$id}`}
+                        aria-label="Close fullscreen image"
+                        onClick={closeLightbox}
+                        className="absolute top-5 right-5 z-10 p-2.5 rounded-full glass-panel border border-white/10 text-white text-2xl hover:bg-white/20 transition-all active:scale-90"
+                    >
+                        <RiCloseLine />
                     </button>
-                </div>
-            </div>
 
-            {/* Post Content */}
-            <div className="mt-5 space-y-2.5 px-1">
-                <div className="flex items-start gap-2 text-sm leading-relaxed text-on-surface/90">
-                    <span className="font-bold text-on-surface">{isCreatorLoading ? "..." : (creatorUser?.username || "user")}</span>
-                    <p className="font-body opacity-80">{post.caption}</p>
-                </div>
+                    {/* User info pill */}
+                    <div className="absolute top-5 left-5 z-10 flex items-center gap-3 px-4 py-2.5 rounded-full glass-panel border border-white/10">
+                        <img
+                            src={creatorUser?.imageUrl || "/assets/avatar-placeholder.png"}
+                            alt={creatorUser?.name || "User"}
+                            className="w-7 h-7 rounded-full object-cover border border-white/20"
+                        />
+                        <span className="font-headline font-bold text-sm text-white tracking-tight">
+                            @{creatorUser?.username || creatorUser?.name || "user"}
+                        </span>
+                    </div>
 
-                <div className="flex items-center gap-4">
-                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40">
-                        {new Date(post.$createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {/* Image — stop propagation so clicking the image itself doesn't close */}
+                    <div
+                        className="relative z-10 max-w-[90vw] max-h-[90vh] animate-in zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            src={post.imageUrl}
+                            alt="Fullscreen view"
+                            className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
+                        />
+                    </div>
+
+                    {/* Hint */}
+                    <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                        Press Esc or click outside to close
                     </p>
-                    <span className="h-1 w-1 rounded-full bg-on-surface-variant/20"></span>
-                    <button className="text-[10px] text-primary font-bold uppercase tracking-widest hover:text-on-surface transition-colors">
-                        View all comments
-                    </button>
                 </div>
-            </div>
-        </article>
+            )}
+        </>
     )
 }
 

@@ -28,8 +28,16 @@ export const postSchema = z.object({
   tags: z.string().optional()
 })
 
+export const reelSchema = z.object({
+  caption: z.string().min(5, "Caption must be at least 5 characters").max(2200, "Caption too long"),
+  file: z.custom<File[]>(),
+  audio: z.string().max(100).optional().or(z.literal('')),
+  tags: z.string().optional(),
+})
+
 // Inferred types for convenience
 export type SignupSchema = z.infer<typeof signupSchema>
 export type SigninSchema = z.infer<typeof signinSchema>
 export type PostSchema = z.infer<typeof postSchema>
+export type ReelSchema = z.infer<typeof reelSchema>
 export type PasswordUpdateSchema = z.infer<typeof passwordUpdateSchema>

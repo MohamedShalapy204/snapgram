@@ -32,6 +32,30 @@ export interface NewPost {
   tags?: string
 }
 
+export interface NewReel {
+  caption: string
+  file: File[]
+  audio?: string
+  tags?: string
+}
+
+export interface Comment {
+  $id: string
+  postId?: string
+  reelId?: string
+  userId: string
+  text: string
+  $createdAt: string
+  $updatedAt?: string
+}
+
+export interface NewComment {
+  postId?: string
+  reelId?: string
+  userId: string
+  text: string
+}
+
 export interface INavLink {
   icon: React.ReactNode
   path: string

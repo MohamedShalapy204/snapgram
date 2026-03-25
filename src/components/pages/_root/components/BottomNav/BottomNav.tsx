@@ -33,7 +33,7 @@ const BottomNav = () => {
                 </NavLink>
             ))}
 
-            <NavLink to="/profile" className={({ isActive }) => `
+            <NavLink to={`/profile/${userAccount?.id}`} className={({ isActive }) => `
                 h-8 w-8 rounded-full overflow-hidden transition-all active:scale-95
                 ${isActive ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110" : "border border-on-surface-variant/40"}
             `}>

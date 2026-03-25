@@ -18,4 +18,7 @@ export const QUERY_KEYS = {
 
     // Search Keys
     SEARCH_POSTS: 'searchPosts',
+
+    // Comment Keys
+    GET_COMMENTS: 'comments',
 } as const;

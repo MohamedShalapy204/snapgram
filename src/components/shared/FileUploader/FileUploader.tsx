@@ -1,13 +1,18 @@
 import { useCallback, useState } from "react";
 import { useDropzone, type FileWithPath } from "react-dropzone";
-import { FaCloudUploadAlt, FaImages } from "react-icons/fa";
+import { RiUpload2Line, RiImageAddLine, RiImageEditLine } from "react-icons/ri";
 
 type FileUploaderProps = {
     fieldChange: (files: File[]) => void;
     mediaUrl: string;
+    type?: "profile" | "post";
 };
 
-const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
+/**
+ * FileUploader - A cinematic, glassmorphic file upload component.
+ * Part of the 'Cinematic Aperture' design system.
+ */
+const FileUploader = ({ fieldChange, mediaUrl, type = "post" }: FileUploaderProps) => {
     const [fileUrl, setFileUrl] = useState(mediaUrl);
 
     const onDrop = useCallback(
@@ -25,39 +30,80 @@ const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
         },
     });
 
+    const isProfile = type === "profile";
+
     return (
         <div
             {...getRootProps()}
-            className="flex flex-center flex-col bg-base-300 rounded-3xl cursor-pointer border-2 border-dashed border-base-content/10 hover:border-primary/50 transition-all group overflow-hidden min-h-64 md:min-h-96"
+            className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-700 active:scale-[0.98] group overflow-hidden
+                ${isProfile
+                    ? "w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-background shadow-3xl ring-1 ring-white/10"
+                    : "w-full min-h-[300px] md:min-h-[450px] rounded-3xl bg-surface-container/40 backdrop-blur-md border-2 border-dashed border-white/5 hover:border-primary/40"
+                }
+            `}
         >
             <input {...getInputProps()} className="cursor-pointer" />
 
             {fileUrl ? (
-                <div className="flex flex-1 justify-center w-full p-5 lg:p-10 relative group/image">
+                <div className="relative w-full h-full group/image flex items-center justify-center">
                     <img
                         src={fileUrl}
                         alt="Preview"
-                        className="h-64 lg:h-[400px] w-full object-cover rounded-2xl shadow-2xl transition-transform duration-700 group-hover/image:scale-[1.02]"
+                        className={`object-cover transition-all duration-[1.5s] ease-out group-hover/image:scale-110 brightness-[0.85] group-hover/image:brightness-105
+                            ${isProfile ? "w-full h-full rounded-full" : "w-full h-full rounded-3xl"}
+                        `}
                     />
-                    <div className="absolute inset-x-0 bottom-10 flex justify-center opacity-0 group-hover/image:opacity-100 transition-opacity">
-                        <p className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-white">Click or drag photo to replace</p>
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-x-0 bottom-0 top-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-500">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="p-3 bg-white/10 rounded-2xl border border-white/20 shadow-2xl backdrop-blur-xl">
+                                <RiImageEditLine className="text-white text-2xl" />
+                            </div>
+                            {!isProfile && (
+                                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white drop-shadow-md">Replace Capture</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center h-full w-full py-12 space-y-4">
-                    <div className={`h-20 w-20 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl ${isDragActive ? 'bg-primary text-primary-content scale-110' : 'bg-base-200 text-primary-content/20'}`}>
-                        <FaCloudUploadAlt className="text-4xl" />
+                <div className={`flex flex-col items-center justify-center w-full h-full space-y-6 p-8
+                    ${isDragActive ? 'bg-primary/10' : ''}
+                `}>
+                    <div className={`relative flex items-center justify-center transition-all duration-700
+                        ${isDragActive ? 'scale-110' : ''}
+                    `}>
+                        {/* Animated Glow Background */}
+                        <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full opacity-40 animate-pulse"></div>
+
+                        <div className="relative p-5 bg-surface-container rounded-3xl border border-white/10 shadow-2xl text-primary text-4xl group-hover:sunset-gradient group-hover:text-white transition-all duration-500">
+                            {isDragActive ? <RiUpload2Line /> : <RiImageAddLine />}
+                        </div>
                     </div>
-                    <div className="text-center space-y-2">
-                        <h3 className="text-xl font-black tracking-tight">{isDragActive ? 'Drop it here!' : 'Select a photo'}</h3>
-                        <p className="text-[10px] uppercase font-black tracking-widest text-base-content/30 italic">SVG, PNG, JPG (Max 5MB)</p>
-                    </div>
-                    <button type="button" className="btn btn-outline btn-primary rounded-xl px-10 btn-sm font-black uppercase tracking-widest text-[10px]">
-                        Choose from folder
-                    </button>
-                    <div className="absolute bottom-6 opacity-5 pointer-events-none">
-                        <FaImages className="text-9xl" />
-                    </div>
+
+                    {!isProfile && (
+                        <div className="text-center space-y-4 max-w-xs animate-in fade-in slide-in-from-bottom-2 duration-700">
+                            <h3 className="font-headline text-2xl font-extrabold tracking-tight text-on-surface">
+                                {isDragActive ? 'Release to Snapshot' : 'Begin Your Story'}
+                            </h3>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant italic opacity-60">
+                                Drag High-Res Assets or Browse
+                            </p>
+
+                            <div className="pt-2">
+                                <span className="inline-block px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover:text-primary transition-colors">
+                                    JPG • PNG • SVG • MAX 5MB
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Visual Flare */}
+            {!fileUrl && !isProfile && (
+                <div className="absolute bottom-8 right-8 opacity-5 pointer-events-none transition-transform duration-1000 group-hover:scale-125 group-hover:rotate-12">
+                    <RiImageAddLine className="text-[12rem]" />
                 </div>
             )}
         </div>
