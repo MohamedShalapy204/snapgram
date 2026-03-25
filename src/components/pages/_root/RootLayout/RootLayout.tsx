@@ -1,13 +1,15 @@
 import { Outlet, Navigate } from "react-router-dom"
-import Sidebar from "../components/Sidebar"
-import Topbar from "../components/Topbar"
-import CommentsSideBar from "../../../shared/CommentsSideBar"
+import AppHeader from "../components/AppHeader/AppHeader"
+import RightSidebar from "../components/RightSidebar/RightSidebar"
+import BottomNav from "../components/BottomNav/BottomNav"
 import { useUserAccount, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
 import { MdInfoOutline } from "react-icons/md"
 
+import { RiCameraLensLine } from "react-icons/ri"
+
 /**
- * RootLayout - Private area layout with Sidebar and Topbar.
- * Following react-ecosystem guidelines: separate layout logic from components.
+ * RootLayout - Private area layout with Cinematic Header and Sidebar.
+ * Following "The Cinematic Aperture" design strategy.
  */
 const RootLayout = () => {
     const { data: userAccount, isPending } = useUserAccount()
@@ -15,69 +17,13 @@ const RootLayout = () => {
 
     if (isPending) {
         return (
-            <div className="flex w-full flex-col md:flex-row min-h-screen bg-base-200">
-                {/* Topbar Skeleton (Mobile) */}
-                <div className="flex md:hidden flex-col bg-base-100 border-b border-base-300 w-full sticky top-0 z-50 shadow-md">
-                    <div className="flex items-center justify-between p-4 pb-2">
-                        <div className="flex items-center gap-2">
-                            <div className="skeleton h-10 w-10 rounded-xl"></div>
-                            <div className="skeleton h-6 w-16 rounded-md"></div>
-                        </div>
-                        <div className="skeleton h-9 w-9 rounded-full ring-1 ring-primary/20"></div>
-                    </div>
-                    <div className="flex items-center justify-between px-3 pb-3 gap-2">
-                        {[...Array(8)].map((_, i) => (
-                            <div key={`topbar-skel-${i}`} className="skeleton h-8 w-8 rounded-full flex-none"></div>
-                        ))}
+            <div className="flex w-full min-h-screen bg-background">
+                <div className="w-full flex flex-col pt-24 items-center">
+                    <div className="skeleton h-1 w-full bg-primary/10"></div>
+                    <div className="flex h-[50vh] items-center justify-center">
+                        <span className="loading loading-spinner text-primary loading-lg"></span>
                     </div>
                 </div>
-
-                {/* Sidebar Skeleton (Desktop) */}
-                <div className="hidden md:flex flex-col gap-10 w-72 bg-base-100 p-10 border-r border-base-300 min-h-screen sticky top-0 left-0 shadow-2xl z-10">
-                    <div className="flex items-center gap-3">
-                        <div className="skeleton h-10 w-10 rounded-xl"></div>
-                        <div className="skeleton h-8 w-20 rounded-md"></div>
-                    </div>
-
-                    <div className="flex flex-col gap-6 p-4 rounded-3xl bg-base-200/50 ring-1 ring-base-300/10">
-                        <div className="flex items-center gap-4">
-                            <div className="skeleton w-14 h-14 rounded-2xl shrink-0"></div>
-                            <div className="flex flex-col flex-1 gap-2">
-                                <div className="skeleton h-4 w-20"></div>
-                                <div className="skeleton h-3 w-16"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-4 mt-2">
-                        {[...Array(8)].map((_, i) => (
-                            <div key={`sidebar-skel-${i}`} className="flex items-center gap-4 px-5 py-2">
-                                <div className="skeleton h-6 w-6 rounded-md shrink-0"></div>
-                                <div className="skeleton h-4 w-full max-w-[120px] rounded-md"></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Main Content Skeleton */}
-                <section className="flex flex-col flex-1 h-full py-10 px-4 md:px-10 items-center overflow-y-auto">
-                    <div className="max-w-4xl w-full flex flex-col gap-8">
-                        {/* Example Post Skeleton */}
-                        <div className="flex items-center gap-4 w-full">
-                            <div className="skeleton h-12 w-12 rounded-full shrink-0"></div>
-                            <div className="flex flex-col gap-2 w-full max-w-[200px]">
-                                <div className="skeleton h-4 w-full"></div>
-                                <div className="skeleton h-3 w-3/4"></div>
-                            </div>
-                        </div>
-                        <div className="skeleton h-96 w-full rounded-2xl"></div>
-                        <div className="flex flex-col gap-3">
-                            <div className="skeleton h-4 w-full"></div>
-                            <div className="skeleton h-4 w-4/5"></div>
-                            <div className="skeleton h-4 w-3/4"></div>
-                        </div>
-                    </div>
-                </section>
             </div>
         )
     }
@@ -86,39 +32,53 @@ const RootLayout = () => {
         return <Navigate to="/signin" />
     }
 
-
-
     return (
-        <div className="flex w-full flex-col md:flex-row min-h-screen bg-base-200 selection:bg-primary selection:text-primary-content">
-            <Topbar />
-            <Sidebar />
-            <CommentsSideBar />
+        <div className="flex w-full min-h-screen flex-col bg-background text-on-surface selection:bg-primary/30 selection:text-white">
+            <AppHeader />
 
-            <section className="flex flex-col flex-1 h-full py-10 px-4 md:px-10 items-center overflow-y-auto custom-scrollbar">
-                {!userAccount.verified && (
-                    <div className="alert alert-warning shadow-lg max-w-4xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl animate-in slide-in-from-top duration-500">
-                        <div className="flex items-center gap-3">
-                            <MdInfoOutline className="text-2xl shrink-0" />
-                            <div className="text-left">
-                                <h3 className="font-black text-sm uppercase tracking-wider">Email Verification Required</h3>
-                                <p className="text-xs font-medium opacity-80 leading-relaxed">Please check your inbox to verify your account and unlock all features.</p>
+            <main className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-6 pt-24 pb-12 transition-all duration-700 md:pt-28 lg:grid-cols-12 lg:gap-12">
+
+                {/* Main Content Area */}
+                <div className="flex flex-col md:items-start lg:col-span-8">
+                    {!userAccount.verified && (
+                        <div className="glass-panel mb-10 flex w-full animate-in slide-in-from-top-6 duration-700 flex-col items-center justify-between gap-6 rounded-2xl border border-primary/20 p-6 shadow-2xl shadow-primary/10 transition-all sm:flex-row ring-1 ring-primary/10">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-primary shadow-inner">
+                                    <MdInfoOutline className="text-2xl" />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="font-headline text-sm font-bold uppercase tracking-[0.15em] text-primary">Email Verification Required</h3>
+                                    <p className="font-body text-xs font-medium leading-relaxed text-on-surface-variant opacity-80 mt-1 italic">Please check your inbox to unlock all cinematic features.</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => sendVerification(`${window.location.origin}/verify-email`)}
+                                disabled={isSending}
+                                className="electric-gradient-btn w-full rounded-2xl px-8 py-3 font-bold text-white shadow-lg shadow-brand-primary/20 active:scale-95 transition-all sm:w-auto"
+                            >
+                                {isSending ? <span className="loading loading-spinner loading-xs"></span> : "Resend Email"}
+                            </button>
                         </div>
-                        <button
-                            onClick={() => sendVerification(`${window.location.origin}/verify-email`)}
-                            disabled={isSending}
-                            className="btn btn-sm btn-ghost bg-base-100/20 hover:bg-base-100/40 font-black rounded-xl shrink-0 border-none px-6"
-                        >
-                            {isSending ? <span className="loading loading-spinner loading-xs"></span> : "Resend Email"}
-                        </button>
+                    )}
+
+                    <div className="w-full">
+                        <Outlet />
                     </div>
-                )}
-                <div className="max-w-4xl w-full">
-                    <Outlet />
                 </div>
-            </section>
+
+                {/* Desktop Sticky Sidebar */}
+                <RightSidebar />
+            </main>
+
+            <BottomNav />
+
+            {/* Lens Flare FAB (For adding new post) */}
+            <button className="fixed bottom-24 right-8 z-40 flex h-16 w-16 items-center justify-center rounded-full sunset-gradient text-white shadow-[0_0_20px_rgba(255,121,129,0.5)] transition-all active:scale-90 md:bottom-12 group text-3xl">
+                <RiCameraLensLine className="transition-transform group-hover:rotate-90 duration-500" />
+            </button>
         </div>
     )
 }
 
 export default RootLayout
+

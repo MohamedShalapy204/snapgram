@@ -15,12 +15,14 @@ export interface Post {
   $id: string
   caption: string
   imageUrl: string
+  imageId: string // Essential for Storage deletion
   location?: string
   tags?: string[]
   creator: string
   likes: string[] // List of user IDs who liked the post
   save: string[] // List of user IDs who saved the post
   $createdAt: string
+  $updatedAt?: string
 }
 
 export interface NewPost {
@@ -50,7 +52,7 @@ export interface User {
   name: string
   username: string
   email: string
-  bio: string
+  bio?: string
   imageId: string
   imageUrl: string
   posts: string[]

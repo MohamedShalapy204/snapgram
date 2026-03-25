@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { storage } from '../config';
 import { uploadFile, getFilePreview, deleteFile } from './storage';
-import { ImageGravity, type Models } from 'appwrite';
+import { type Models } from 'appwrite';
 
 vi.mock('../config', () => ({
     storage: {
         createFile: vi.fn(),
-        getFilePreview: vi.fn(),
+        getFileView: vi.fn(),
         deleteFile: vi.fn(),
     },
     appwriteConfig: {
@@ -45,26 +45,23 @@ describe('StorageService', () => {
     });
 
     describe('getFilePreview', () => {
-        it('should call getFilePreview with correct parameters', () => {
+        it('should call getFileView internally with correct parameters', () => {
             const fileId = 'file123';
             const mockUrl = 'http://test.com/preview.jpg';
-            vi.mocked(storage.getFilePreview).mockReturnValueOnce(mockUrl);
+            // Mock getFileView to return an object with a toString method
+            vi.mocked(storage.getFileView).mockReturnValueOnce({ toString: () => mockUrl } as any);
 
             const result = getFilePreview(fileId);
 
-            expect(storage.getFilePreview).toHaveBeenCalledWith(
+            expect(storage.getFileView).toHaveBeenCalledWith(
                 'test-storage',
-                fileId,
-                2000,
-                2000,
-                ImageGravity.Top,
-                100
+                fileId
             );
             expect(result).toEqual(mockUrl);
         });
 
-        it('should return empty string if getFilePreview fails', () => {
-            vi.mocked(storage.getFilePreview).mockImplementationOnce(() => {
+        it('should return empty string if getFileView fails', () => {
+            vi.mocked(storage.getFileView).mockImplementationOnce(() => {
                 throw new Error('Preview failed');
             });
 

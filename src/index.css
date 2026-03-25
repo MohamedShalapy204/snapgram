@@ -1,2 +1,111 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@theme {
+  /* Cinematic Aperture Theme - Sunset & Deep Space */
+  --color-on-surface-variant: #a8a7d5;
+  --color-on-primary-container: #380008;
+  --color-tertiary-dim: #5ca0f3;
+  --color-on-error-container: #ff97a3;
+  --color-error-container: #8a1632;
+  --color-on-secondary: #6000a4;
+  --color-tertiary: #a4c9ff;
+  --color-primary-container: #ff5f6d;
+  --color-surface-container-lowest: #000000;
+  --color-surface-bright: #272752;
+  --color-surface-dim: #0c0c1f;
+  --color-on-secondary-container: #c589ff;
+  --color-on-secondary-fixed-variant: #831bd7;
+  --color-on-background: #e5e3ff;
+  --color-outline: #72719c;
+  --color-tertiary-fixed: #8abbff;
+  --color-surface-variant: #222247;
+  --color-on-tertiary: #004178;
+  --color-primary-fixed-dim: #ff9599;
+  --color-on-tertiary-fixed: #002141;
+  --color-surface-tint: #ff7981;
+  --color-on-primary: #530010;
+  --color-inverse-on-surface: #53536a;
+  --color-secondary-fixed-dim: #e7c9ff;
+  --color-secondary-fixed: #f0dbff;
+  --color-outline-variant: #44446c;
+  --color-on-error: #490013;
+  --color-on-primary-fixed-variant: #8f0224;
+  --color-background: #0c0c1f;
+  --color-on-tertiary-fixed-variant: #004077;
+  --color-on-surface: #e5e3ff;
+  --color-secondary-container: #3b0068;
+  --color-inverse-primary: #b4273b;
+  --color-surface-container-low: #111128;
+  --color-inverse-surface: #fcf8ff;
+  --color-primary-dim: #ff6f79;
+  --color-surface-container: #161632;
+  --color-primary: #ff7981;
+  --color-surface: #0c0c1f;
+  --color-surface-container-high: #1c1c3d;
+  --color-surface-container-highest: #222247;
+  --color-tertiary-container: #8abbff;
+  --color-error-dim: #c8475d;
+  --color-secondary: #ddb7ff;
+  --color-primary-fixed: #ffabad;
+  --color-on-secondary-fixed: #5e00a2;
+  --color-on-primary-fixed: #570012;
+  --color-tertiary-fixed-dim: #6eaeff;
+  --color-on-tertiary-container: #003767;
+  --color-error: #fd6f85;
+  --color-secondary-dim: #9e42f2;
+  
+  /* Brand Specifics */
+  --color-brand-primary: #ff7981;
+  --color-brand-sunset: #ff5f6d;
+
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+  --font-display: "Manrope", sans-serif;
+
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
+@utility sunset-gradient {
+  background: linear-gradient(135deg, #ff7981 0%, #ff5f6d 100%);
+}
+
+@utility glass-panel {
+  background: rgba(34, 34, 71, 0.4);
+  backdrop-filter: blur(12px);
+}
+
+@utility vignette-overlay {
+  background: radial-gradient(circle, transparent 20%, rgba(12, 12, 31, 0.4) 100%);
+}
+
+@utility electric-gradient-text {
+  background: linear-gradient(135deg, #ff7981, #ff5f6d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility electric-gradient-btn {
+  background: linear-gradient(135deg, #ff7981, #ff5f6d);
+}
+
+@utility glass-card {
+  background: rgba(22, 22, 50, 0.65);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+body {
+  background-color: #0c0c1f;
+  @apply font-body text-on-surface flex flex-col min-h-screen selection:bg-brand-primary/30 selection:text-white;
+}
+
+/* Material Symbols settings */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}

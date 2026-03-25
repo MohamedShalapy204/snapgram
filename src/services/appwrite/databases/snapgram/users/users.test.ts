@@ -107,7 +107,7 @@ describe('UserService', () => {
             expect(databases.listDocuments).toHaveBeenCalledWith(
                 'test-db',
                 'test-users',
-                [Query.or([Query.search("name", "test"), Query.search("username", "test")])]
+                [Query.or([Query.contains("name", "test"), Query.contains("username", "test")])]
             );
         });
     });
