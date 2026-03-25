@@ -2,6 +2,7 @@ import { Outlet, Navigate } from "react-router-dom"
 import AppHeader from "../components/AppHeader/AppHeader"
 import RightSidebar from "../components/RightSidebar/RightSidebar"
 import BottomNav from "../components/BottomNav/BottomNav"
+import CommentsSideBar from "../../../shared/CommentsSideBar"
 import { useUserAccount, useSendVerificationEmail } from "../../../../hooks/queries/useAuth"
 import { MdInfoOutline } from "react-icons/md"
 
@@ -76,6 +77,8 @@ const RootLayout = () => {
             <button className="fixed bottom-24 right-8 z-40 flex h-16 w-16 items-center justify-center rounded-full sunset-gradient text-white shadow-[0_0_20px_rgba(255,121,129,0.5)] transition-all active:scale-90 md:bottom-12 group text-3xl">
                 <RiCameraLensLine className="transition-transform group-hover:rotate-90 duration-500" />
             </button>
+
+            <CommentsSideBar />
         </div>
     )
 }
