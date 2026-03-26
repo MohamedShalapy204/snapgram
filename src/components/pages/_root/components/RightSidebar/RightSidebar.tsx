@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { useUserAccount } from "../../../../../hooks/queries/useAuth"
 
 /**
@@ -35,7 +36,7 @@ const RightSidebar = () => {
             <div className="space-y-6">
                 <div className="flex justify-between items-center px-1">
                     <h5 className="font-headline font-semibold text-xs text-on-surface-variant uppercase tracking-[0.15em] opacity-80">Suggested for you</h5>
-                    <button className="text-[10px] font-bold text-on-surface hover:text-primary transition-colors tracking-widest uppercase">See All</button>
+                    <Link to="/all-users" className="text-[10px] font-bold text-on-surface hover:text-primary transition-colors tracking-widest uppercase">See All</Link>
                 </div>
 
                 <div className="space-y-5">

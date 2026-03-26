@@ -5,13 +5,15 @@ import { Provider } from "react-redux"
 import { combineReducers, configureStore } from "@reduxjs/toolkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import toastReducer from "../src/store/slices/toastSlice.ts"
+import commentReducer from "../src/store/slices/commentSlice.ts"
 import type { RootState, AppStore } from "../src/store/store.ts"
 
 /**
  * Combined reducer for use in tests to match the store's structure and satisfy RTK types.
  */
 const rootReducer = combineReducers({
-    toast: toastReducer
+    toast: toastReducer,
+    comment: commentReducer
 })
 
 /**

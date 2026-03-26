@@ -2,6 +2,8 @@ import { ID, Query } from "appwrite";
 import { databases, appwriteConfig } from "../../../config";
 import type { NewComment } from "../../../../../types";
 
+const COMMENTS_PAGE_SIZE = 15;
+
 /**
  * Creates a new comment document for a post.
  */
@@ -33,7 +35,7 @@ export const createComment = async (comment: NewComment) => {
 };
 
 /**
- * Fetches all comments for a given post or reel, ordered oldest first.
+ * Fetches all comments for a given post or reel (non-paginated).
  */
 export const getComments = async (postId?: string, reelId?: string) => {
     try {
@@ -55,6 +57,35 @@ export const getComments = async (postId?: string, reelId?: string) => {
         throw error;
     }
 };
+
+/**
+ * Fetches paginated comments for a given post or reel.
+ * @param postId - Optional post ID to filter by.
+ * @param reelId - Optional reel ID to filter by.
+ * @param cursor - The $id of the last document on the previous page.
+ */
+export const getCommentsPaginated = async (postId?: string, reelId?: string, cursor?: string) => {
+    try {
+        const queries = [
+            Query.orderAsc("$createdAt"),
+            Query.limit(COMMENTS_PAGE_SIZE),
+        ];
+
+        if (postId) queries.push(Query.equal("postId", postId));
+        if (reelId) queries.push(Query.equal("reelId", reelId));
+        if (cursor) queries.push(Query.cursorAfter(cursor));
+
+        return await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.commentsCollectionId,
+            queries
+        );
+    } catch (error) {
+        console.error("CommentService :: getCommentsPaginated error:", error);
+        throw error;
+    }
+};
+
 
 /**
  * Deletes a comment by its document ID.

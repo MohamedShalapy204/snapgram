@@ -1,14 +1,45 @@
-import { useGetRecentPosts } from "../../../../hooks/queries/usePosts"
+import { useRef, useCallback } from "react"
+import { useGetRecentPostsInfinite } from "../../../../hooks/queries/usePosts"
 import { type Post } from "../../../../types"
 import PostCard from "../../../shared/PostCard"
-import { RiAddLine, RiErrorWarningLine, RiImageLine } from "react-icons/ri"
+import { RiAddLine, RiErrorWarningLine, RiImageLine, RiLoader4Line } from "react-icons/ri"
 
 /**
- * Home - The cinematic main feed with Stories and Recently captured posts.
+ * Home - Cinematic main feed with infinite-scroll pagination.
  * Following "The Cinematic Aperture" design system with React Icons.
  */
 const Home = () => {
-    const { data: posts, isLoading, isError } = useGetRecentPosts()
+    const {
+        data,
+        isLoading,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useGetRecentPostsInfinite()
+
+    // Flatten all pages into a single list
+    const postList = data?.pages.flatMap((p) => p.documents as unknown as Post[]) ?? []
+
+    // Intersection Observer sentinel for auto-loading next page
+    const observerRef = useRef<IntersectionObserver | null>(null)
+
+    const sentinelCallback = useCallback(
+        (node: HTMLDivElement | null) => {
+            if (observerRef.current) observerRef.current.disconnect()
+            if (!node) return
+            observerRef.current = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage()
+                    }
+                },
+                { threshold: 0.1 }
+            )
+            observerRef.current.observe(node)
+        },
+        [hasNextPage, isFetchingNextPage, fetchNextPage]
+    )
 
     if (isLoading) {
         return (
@@ -22,7 +53,6 @@ const Home = () => {
                         </div>
                     ))}
                 </div>
-
                 {/* Post Skeletons */}
                 <div className="space-y-16">
                     {[...Array(3)].map((_, i) => (
@@ -60,13 +90,10 @@ const Home = () => {
         )
     }
 
-    const postList = posts?.documents as unknown as Post[]
-
     return (
         <div className="flex flex-col gap-12 animate-in fade-in duration-1000">
             {/* Stories Section */}
             <section className="flex space-x-6 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
-                {/* User's Story */}
                 <div className="shrink-0 flex flex-col items-center space-y-2.5 group cursor-pointer transition-transform hover:scale-105 duration-500">
                     <div className="w-20 h-20 rounded-full p-[3px] sunset-gradient shadow-lg">
                         <div className="w-full h-full rounded-full border-4 border-surface bg-surface overflow-hidden relative group-hover:border-primary/50 transition-all duration-500">
@@ -78,7 +105,6 @@ const Home = () => {
                     <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-80 group-hover:text-primary transition-colors">Capture</span>
                 </div>
 
-                {/* Simulated Stories */}
                 {[
                     { name: "elara_v", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCrDj9fQvAEuP0i8-R2PV9Pr7kXbqiSPGLnRKINxOcvT2fZC7ykwhlLO-Q5eRrxQXzTWjlPfbTwQtXdArzJ1KaP2nIDTRhhu73HOeSc3FFvI0oNHBIh83F438h0EAmOglDEXRmdlFlCzNODBf8Wkrx45ezZC7V5onTnDWqxiIu_YcNaxTyG6f_rHtAvcn2KQMvUP-WSbtJm0ZpAMbNSk0n2NouF9miok11u-xncq5f6WADGRNQHVqYAIH8giS9Q5E1tcoRxyThc9Nw" },
                     { name: "marcus.k", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBeKcbnqXlL10ghzCDTXVDUJKYe8KvpUUtcOoBaOmlBVto6o3umIXr_Z8JNbvC1hI4ivM-KABWBct_x2mP9l2TeW4VTmWvH_xX5gbIk-kPA66AGGGuWpBAHaaOYgNaIUyN9VxlUFn-JELRs2Uy46WeM3KZM9cF0hNn7dkVggIiCjvPYnJHf89fkY4vnwPeG4DrfxfO77bWYOaeMD6-qUGesDIPy42HlCtNQKKP2MFFtN7R2FXXkAaAXa9QyVfjXaRVsSnVv7QB9_cg" },
@@ -98,7 +124,7 @@ const Home = () => {
 
             {/* Main Feed Items */}
             <div className="space-y-16">
-                {postList?.length > 0 ? (
+                {postList.length > 0 ? (
                     postList.map((post: Post) => (
                         <PostCard key={post.$id} post={post} />
                     ))
@@ -107,6 +133,23 @@ const Home = () => {
                         <RiImageLine className="text-on-surface-variant/20 text-6xl mb-4" />
                         <p className="text-on-surface-variant italic">No posts found in the aperture.</p>
                     </div>
+                )}
+
+                {/* Infinite Scroll Sentinel */}
+                <div ref={sentinelCallback} className="h-4 w-full" />
+
+                {/* Load More Spinner */}
+                {isFetchingNextPage && (
+                    <div className="flex justify-center py-8">
+                        <RiLoader4Line className="text-primary text-3xl animate-spin" />
+                    </div>
+                )}
+
+                {/* End of Feed */}
+                {!hasNextPage && postList.length > 0 && (
+                    <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant opacity-30 italic pb-8">
+                        — End of the aperture —
+                    </p>
                 )}
             </div>
         </div>

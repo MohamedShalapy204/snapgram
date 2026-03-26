@@ -10,6 +10,7 @@ export const QUERY_KEYS = {
     GET_POSTS: 'posts',
     GET_POST_BY_ID: 'post',
     GET_RECENT_POSTS: 'recentPosts',
+    GET_RECENT_POSTS_PAGINATED: 'recentPostsPaginated',
 
     // User Keys
     GET_USERS: 'users',
@@ -21,4 +22,11 @@ export const QUERY_KEYS = {
 
     // Comment Keys
     GET_COMMENTS: 'comments',
+    GET_COMMENTS_PAGINATED: 'commentsPaginated',
+
+    // Reel Keys
+    GET_REELS: 'reels',
+    GET_REELS_PAGINATED: 'reelsPaginated',
+    GET_USER_REELS: 'userReels',
+    GET_USER_REELS_PAGINATED: 'userReelsPaginated',
 } as const;

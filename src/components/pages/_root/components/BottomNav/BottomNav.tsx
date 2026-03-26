@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom"
 import { useUserAccount } from "../../../../../hooks/queries/useAuth"
-import { RiHome5Line, RiHome5Fill, RiSearchLine, RiFilmLine, RiFilmFill, RiNotification3Line, RiNotification3Fill } from "react-icons/ri"
+import { RiHome5Line, RiHome5Fill, RiSearchLine, RiFilmLine, RiFilmFill, RiUserLine, RiUserFill } from "react-icons/ri"
 
 /**
  * BottomNav - Mobile-only navigation bar that stays at the bottom.
@@ -13,7 +13,7 @@ const BottomNav = () => {
         { iconOutline: RiHome5Line, iconFill: RiHome5Fill, path: "/" },
         { iconOutline: RiSearchLine, iconFill: RiSearchLine, path: "/explore" },
         { iconOutline: RiFilmLine, iconFill: RiFilmFill, path: "/reels" },
-        { iconOutline: RiNotification3Line, iconFill: RiNotification3Fill, path: "/notifications" },
+        { iconOutline: RiUserLine, iconFill: RiUserFill, path: "/all-users" },
     ]
 
     return (

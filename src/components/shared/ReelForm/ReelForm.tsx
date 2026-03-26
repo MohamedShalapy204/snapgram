@@ -3,21 +3,24 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router-dom"
 import { reelSchema, type ReelSchema } from "../../../utils/validation"
 import { useToast } from "../../../hooks/useToast"
+import { useCreateReel } from "../../../hooks/queries/useReels"
+import { useUserAccount } from "../../../hooks/queries/useAuth"
+import { uploadFile, getFilePreview } from "../../../services/appwrite"
 import ReelUploader from "../ReelUploader"
 
 /**
  * ReelForm - Form for creating a new reel.
- * Follows the 'Cinematic Aperture' design system and clean-react-code skill.
- * NOTE: Reel creation service/hook to be wired once backend is ready.
  */
 const ReelForm = () => {
-    const { info } = useToast()
+    const { success, error } = useToast()
     const navigate = useNavigate()
+    const { data: user } = useUserAccount()
+    const { mutateAsync: createReel, isPending: isCreating } = useCreateReel()
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
         setValue,
     } = useForm<ReelSchema>({
         resolver: zodResolver(reelSchema),
@@ -29,11 +32,33 @@ const ReelForm = () => {
         },
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const onSubmit = async (_reelData: ReelSchema) => {
-        // TODO: wire useCreateReel mutation once Appwrite collection is ready
-        info("Reel creation coming soon! 🎬")
-        navigate("/reels")
+    const onSubmit = async (reelData: ReelSchema) => {
+        if (!user) return;
+
+        try {
+            // 1. Upload Video/Image File
+            const uploadedFile = await uploadFile(reelData.file[0]);
+            if (!uploadedFile) throw new Error("File upload failed");
+
+            // 2. Get Video URL
+            const videoUrl = getFilePreview(uploadedFile.$id);
+
+            // 3. Create Reel Document
+            await createReel({
+                userId: user.id,
+                caption: reelData.caption,
+                videoUrl,
+                videoId: uploadedFile.$id,
+                audio: reelData.audio || "Original Audio",
+                tags: reelData.tags?.split(',').map(tag => tag.trim()) || [],
+            });
+
+            success("Cinematic Reel Published! 🎬");
+            navigate("/reels");
+        } catch (err) {
+            console.error(err);
+            error("Failed to publish reel. Please try again.");
+        }
     }
 
     return (
@@ -138,10 +163,10 @@ const ReelForm = () => {
                 <button
                     id="reel-submit"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isCreating}
                     className="px-16 py-3 rounded-2xl font-black tracking-widest text-xs uppercase bg-primary text-on-primary shadow-2xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-60"
                 >
-                    {isSubmitting ? (
+                    {isCreating ? (
                         <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                         "Publish Reel"

@@ -19,7 +19,7 @@ const ReelUploader = ({ fieldChange, mediaUrl = "" }: ReelUploaderProps) => {
         (acceptedFiles: FileWithPath[]) => {
             fieldChange(acceptedFiles)
             const file = acceptedFiles[0]
-            setIsVideo(file.type.startsWith("video/"))
+            setIsVideo(true) // Now always video
             setFileUrl(URL.createObjectURL(file))
         },
         [fieldChange]
@@ -29,7 +29,6 @@ const ReelUploader = ({ fieldChange, mediaUrl = "" }: ReelUploaderProps) => {
         onDrop,
         accept: {
             "video/*": [".mp4", ".mov", ".webm", ".avi"],
-            "image/*": [".png", ".jpg", ".jpeg"],
         },
         maxSize: 100 * 1024 * 1024, // 100 MB
         multiple: false,
@@ -44,34 +43,12 @@ const ReelUploader = ({ fieldChange, mediaUrl = "" }: ReelUploaderProps) => {
 
             {fileUrl ? (
                 <div className="relative w-full h-full group/media flex items-center justify-center">
-                    {isVideo ? (
-                        <video
-                            src={fileUrl}
-                            controls
-                            className="w-full h-full rounded-3xl object-cover"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                    ) : (
-                        <img
-                            src={fileUrl}
-                            alt="Reel preview"
-                            className="w-full h-full rounded-3xl object-cover transition-all duration-[1.5s] ease-out group-hover/media:scale-105 brightness-[0.85] group-hover/media:brightness-105"
-                        />
-                    )}
-
-                    {/* Hover overlay (only shown for image, video has native controls) */}
-                    {!isVideo && (
-                        <div className="absolute inset-x-0 bottom-0 top-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-all duration-500">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="p-3 bg-white/10 rounded-2xl border border-white/20 shadow-2xl backdrop-blur-xl">
-                                    <RiVideoLine className="text-white text-2xl" />
-                                </div>
-                                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white drop-shadow-md">
-                                    Replace Reel
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    <video
+                        src={fileUrl}
+                        controls
+                        className="w-full h-full rounded-3xl object-cover"
+                        onClick={(e) => e.stopPropagation()}
+                    />
                 </div>
             ) : (
                 <div className={`flex flex-col items-center justify-center w-full h-full space-y-6 p-8 ${isDragActive ? "bg-primary/10" : ""}`}>
@@ -85,14 +62,14 @@ const ReelUploader = ({ fieldChange, mediaUrl = "" }: ReelUploaderProps) => {
 
                     <div className="text-center space-y-4 max-w-xs animate-in fade-in slide-in-from-bottom-2 duration-700">
                         <h3 className="font-headline text-2xl font-extrabold tracking-tight text-on-surface">
-                            {isDragActive ? "Release to Upload" : "Drop Your Reel"}
+                            {isDragActive ? "Release to Upload" : "Drop Your Video"}
                         </h3>
                         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant italic opacity-60">
-                            Drag a video or image, or browse
+                            Drag a cinematic video clip or browse
                         </p>
                         <div className="pt-2">
                             <span className="inline-block px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover:text-primary transition-colors">
-                                MP4 • MOV • WEBM • JPG • PNG • MAX 100MB
+                                MP4 • MOV • WEBM • AVI • MAX 100MB
                             </span>
                         </div>
                     </div>

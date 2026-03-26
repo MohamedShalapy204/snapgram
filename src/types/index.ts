@@ -27,7 +27,7 @@ export interface Post {
 
 export interface NewPost {
   caption: string
-  file: File[]
+  file?: File[]
   location?: string
   tags?: string
 }
@@ -37,6 +37,19 @@ export interface NewReel {
   file: File[]
   audio?: string
   tags?: string
+}
+
+export interface Reel {
+  $id: string
+  creator: string
+  caption: string
+  videoUrl: string
+  videoId: string
+  audio: string
+  tags?: string[]
+  likes: string[]
+  $createdAt: string
+  $updatedAt: string
 }
 
 export interface Comment {

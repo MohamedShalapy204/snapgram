@@ -18,12 +18,85 @@ const RootLayout = () => {
 
     if (isPending) {
         return (
-            <div className="flex w-full min-h-screen bg-background">
-                <div className="w-full flex flex-col pt-24 items-center">
-                    <div className="skeleton h-1 w-full bg-primary/10"></div>
-                    <div className="flex h-[50vh] items-center justify-center">
-                        <span className="loading loading-spinner text-primary loading-lg"></span>
+            <div className="flex w-full min-h-screen bg-background animate-pulse">
+
+                {/* ── Fake Top Nav ─────────────────────────────────── */}
+                <div className="fixed top-0 left-0 right-0 z-50 h-16 md:h-20 bg-surface-container/80 backdrop-blur border-b border-white/5 flex items-center px-6 gap-4">
+                    <div className="skeleton w-8 h-8 rounded-xl" />
+                    <div className="skeleton h-4 w-28 rounded-lg" />
+                    <div className="flex-1" />
+                    <div className="skeleton w-8 h-8 rounded-full" />
+                    <div className="skeleton w-28 h-9 rounded-2xl" />
+                </div>
+
+                {/* ── Main Layout ───────────────────────────────────── */}
+                <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-6 pt-24 pb-12 md:pt-28 lg:grid-cols-12 lg:gap-12">
+
+                    {/* Feed Column */}
+                    <div className="flex flex-col gap-14 lg:col-span-8">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="space-y-5">
+                                {/* Post header */}
+                                <div className="flex items-center gap-3">
+                                    <div className="skeleton w-11 h-11 rounded-full shrink-0" />
+                                    <div className="space-y-2 flex-1">
+                                        <div className="skeleton h-3.5 w-32 rounded-lg" />
+                                        <div className="skeleton h-2.5 w-20 rounded-lg" />
+                                    </div>
+                                    <div className="skeleton w-6 h-6 rounded-lg" />
+                                </div>
+                                {/* Post image — vary heights for realism */}
+                                <div className={`skeleton w-full rounded-3xl ${i === 2 ? "h-72" : "aspect-4/5"}`} />
+                                {/* Action bar */}
+                                <div className="flex items-center gap-5 pt-1">
+                                    <div className="skeleton w-6 h-6 rounded-lg" />
+                                    <div className="skeleton w-6 h-6 rounded-lg" />
+                                    <div className="skeleton h-3 w-12 rounded-lg" />
+                                    <div className="flex-1" />
+                                    <div className="skeleton w-6 h-6 rounded-lg" />
+                                </div>
+                                {/* Caption line */}
+                                <div className="space-y-1.5">
+                                    <div className="skeleton h-3 w-3/4 rounded-md" />
+                                    <div className="skeleton h-3 w-1/2 rounded-md" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
+
+                    {/* Right Sidebar Column */}
+                    <aside className="hidden lg:flex flex-col gap-8 lg:col-span-4 pt-2">
+                        {/* Suggested Users header */}
+                        <div className="skeleton h-3 w-36 rounded-lg" />
+                        {/* User rows */}
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="flex items-center gap-3">
+                                <div className="skeleton w-10 h-10 rounded-full shrink-0" />
+                                <div className="space-y-2 flex-1">
+                                    <div className="skeleton h-3 w-28 rounded-md" />
+                                    <div className="skeleton h-2 w-16 rounded-md" />
+                                </div>
+                                <div className="skeleton w-16 h-7 rounded-xl" />
+                            </div>
+                        ))}
+
+                        {/* Trending tags block */}
+                        <div className="mt-4 space-y-3">
+                            <div className="skeleton h-3 w-24 rounded-lg" />
+                            <div className="flex flex-wrap gap-2">
+                                {[60, 80, 52, 72, 44].map((w, j) => (
+                                    <div key={j} className="skeleton h-7 rounded-2xl" style={{ width: `${w}px` }} />
+                                ))}
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                {/* ── Fake Bottom Nav (mobile) ─────────────────── */}
+                <div className="fixed bottom-0 left-0 right-0 h-16 bg-surface-container/80 backdrop-blur border-t border-white/5 flex items-center justify-around px-6 lg:hidden">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="skeleton w-6 h-6 rounded-lg" />
+                    ))}
                 </div>
             </div>
         )

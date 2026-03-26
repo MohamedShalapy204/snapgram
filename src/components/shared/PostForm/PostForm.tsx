@@ -68,7 +68,9 @@ const PostForm = ({ post, action }: PostFormProps) => {
             </div>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xl font-black uppercase tracking-widest text-base-content/40 mb-2">Add Photo</label>
+                <label className="text-xl font-black uppercase tracking-widest text-base-content/40 mb-2">
+                    Add Photo <span className="text-xs normal-case tracking-normal font-medium opacity-60">(optional)</span>
+                </label>
                 <FileUploader
                     fieldChange={(files) => setValue("file", files)}
                     mediaUrl={post?.imageUrl || ""}

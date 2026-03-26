@@ -23,14 +23,16 @@ export const passwordUpdateSchema = z.object({
 
 export const postSchema = z.object({
   caption: z.string().min(5, "Caption must be at least 5 characters").max(2200, "Caption too long"),
-  file: z.custom<File[]>(),
+  file: z.custom<File[]>().optional(),
   location: z.string().min(2, "Location must be at least 2 characters").max(100).optional().or(z.literal('')),
   tags: z.string().optional()
 })
 
 export const reelSchema = z.object({
   caption: z.string().min(5, "Caption must be at least 5 characters").max(2200, "Caption too long"),
-  file: z.custom<File[]>(),
+  file: z.custom<File[]>().refine((files) => files.length > 0 && files[0].type.startsWith("video/"), {
+    message: "A video file is required for Reels",
+  }),
   audio: z.string().max(100).optional().or(z.literal('')),
   tags: z.string().optional(),
 })
