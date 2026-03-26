@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import { useDropzone, type FileWithPath } from "react-dropzone"
-import { RiUpload2Line, RiVideoAddLine, RiVideoLine } from "react-icons/ri"
+import { RiUpload2Line, RiVideoAddLine } from "react-icons/ri"
 
 type ReelUploaderProps = {
     fieldChange: (files: File[]) => void
@@ -14,6 +14,8 @@ type ReelUploaderProps = {
 const ReelUploader = ({ fieldChange, mediaUrl = "" }: ReelUploaderProps) => {
     const [fileUrl, setFileUrl] = useState(mediaUrl)
     const [isVideo, setIsVideo] = useState(false)
+
+    console.log(isVideo);
 
     const onDrop = useCallback(
         (acceptedFiles: FileWithPath[]) => {

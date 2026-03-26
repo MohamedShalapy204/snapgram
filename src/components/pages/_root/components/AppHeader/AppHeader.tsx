@@ -171,7 +171,7 @@ const AppHeader = () => {
                                                     )}
                                                     <div className="flex-1 overflow-hidden">
                                                         <p className="text-sm text-on-surface font-medium truncate">{post.caption}</p>
-                                                        {post.tags?.length > 0 && (
+                                                        {post.tags?.length && post.tags?.length > 0 && (
                                                             <p className="text-[10px] text-on-surface-variant opacity-60 truncate">
                                                                 #{Array.isArray(post.tags) ? post.tags.slice(0, 3).join(" #") : post.tags}
                                                             </p>

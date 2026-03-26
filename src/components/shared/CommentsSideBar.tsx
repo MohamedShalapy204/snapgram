@@ -220,7 +220,7 @@ const CommentsSideBar = () => {
                     <form onSubmit={handlePostComment} className="relative flex items-end gap-3">
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 bg-surface-container shrink-0 mb-1.5">
                             <img
-                                src={user?.imageUrl || "/assets/avatar-placeholder.png"}
+                                src={user?.avatar || "/assets/avatar-placeholder.png"}
                                 alt="Me"
                                 className="w-full h-full object-cover"
                             />

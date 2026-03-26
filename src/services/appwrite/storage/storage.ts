@@ -1,4 +1,4 @@
-import { ID, ImageGravity, Permission, Role } from "appwrite";
+import { ID, Permission, Role } from "appwrite";
 import { storage, appwriteConfig } from "../config";
 
 /**
