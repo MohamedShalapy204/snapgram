@@ -9,7 +9,7 @@ import { toggleComments } from "../../../../store/slices/commentSlice"
 import { type Post, type Reel } from "../../../../types"
 import {
     RiSettings4Line, RiGridFill, RiFilmLine, RiBookmarkLine,
-    RiHeartFill, RiChat3Fill, RiPlayFill, RiVolumeMuteFill, RiMusicLine, RiLoader4Line
+    RiHeartFill, RiChat3Fill, RiPlayFill, RiVolumeMuteFill, RiMusicLine
 } from "react-icons/ri"
 
 /**
@@ -27,9 +27,9 @@ const Profile = () => {
     const {
         data: reelsData,
         isLoading: isReelsLoading,
-        fetchNextPage: fetchNextReelsPage,
-        hasNextPage: hasMoreReels,
-        isFetchingNextPage: isFetchingMoreReels,
+        // fetchNextPage: fetchNextReelsPage,
+        // hasNextPage: hasMoreReels,
+        // isFetchingNextPage: isFetchingMoreReels,
     } = useGetUserReelsInfinite(id || "")
 
     const isOwner = userAccount?.id === id
@@ -139,7 +139,7 @@ const Profile = () => {
             return (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="aspect-[9/16] bg-surface-container rounded-2xl animate-pulse" />
+                        <div key={i} className="aspect-9/16 bg-surface-container rounded-2xl animate-pulse" />
                     ))}
                 </div>
             )
@@ -172,7 +172,7 @@ const Profile = () => {
                     <Link
                         to="/reels"
                         key={reel.$id}
-                        className="relative group aspect-[9/16] rounded-3xl overflow-hidden bg-surface-container shadow-2xl ring-1 ring-white/5 hover:-translate-y-1 transition-all duration-500"
+                        className="relative group aspect-9/16 rounded-3xl overflow-hidden bg-surface-container shadow-2xl ring-1 ring-white/5 hover:-translate-y-1 transition-all duration-500"
                     >
                         <video
                             src={reel.videoUrl}
